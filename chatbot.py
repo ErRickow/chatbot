@@ -22,7 +22,8 @@ DEV_NAME = os.getenv("DEV_NAME")
 
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-chatbot_enabled = {}
+# All users can interact with the chatbot
+chatbot_enabled = defaultdict(lambda: True)  # Default to True for all users
 user_last_response_time = defaultdict(lambda: 0)  # Dictionary to track user response times
 response_cooldown = 3  # Cooldown duration in seconds
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
@@ -54,7 +55,6 @@ async def start(client, message):
     await message.reply_text(
         f"**👋 Hai {Extract().getMention(message.from_user)}!**\n"
         "Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\n"
-        "Mau aktifin bot? Ketik aja /chatbot on atau gunakan /update untuk melihat fitur baru! ✨\n\n"
         "Lu bisa make bot-nya di grup lo ya. Masih project Balu."
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang")
@@ -72,21 +72,6 @@ async def handle_encrypt(client, message):
     await msg.delete()
     return await Handler().sendLongPres(message, code)
 
-@app.on_message(filters.command("chatbot"))
-async def handle_chatbot(client, message):
-    command = message.text.split()[1].lower() if len(message.text.split()) > 1 else ""
-
-    if command == "on":
-        chatbot_enabled[message.from_user.id] = True
-        await message.reply_text(f"🤖 Chatbot telah diaktifkan untuk {Extract().getMention(message.from_user)}.")
-        logger.get_logger(__name__).info(f"Chatbot diaktifkan untuk {Extract().getMention(message.from_user)}")
-    elif command == "off":
-        chatbot_enabled[message.from_user.id] = False
-        await message.reply_text(f"🚫 Chatbot telah dinonaktifkan untuk {Extract().getMention(message.from_user)}.")
-        logger.get_logger(__name__).info(f"Chatbot dinonaktifkan untuk {Extract().getMention(message.from_user)}")
-    else:
-        await message.reply_text("❓ Perintah tidak dikenal. Gunakan /chatbot on atau /chatbot off.")
-
 @app.on_message(filters.command("clear"))
 async def handle_clear_message(client, message):
     clear = my_api.clear_chat_history(message.from_user.id)
@@ -97,7 +82,7 @@ async def handle_clear_message(client, message):
     & ~filters.bot
     & ~filters.me
     & ~filters.command(
-        ["start", "chatbot", "image", "tagall", "cancel", "clear", "khodam", "tts", "tr", "bencode", "bdecode", "eval"]
+        ["start", "image", "tagall", "cancel", "clear", "khodam", "tts", "tr", "bencode", "bdecode", "eval"]
     )
 )
 async def handle_message(client, message):
@@ -112,8 +97,8 @@ async def handle_message(client, message):
     # Update last response time
     user_last_response_time[message.from_user.id] = current_time
 
-    # Check if chatbot is enabled for the user
-    if not chatbot_enabled.get(message.from_user.id, False):
+    # Check if chatbot is enabled for the chat (which is always True now)
+    if not chatbot_enabled.get(message.chat.id, True):  
         return
 
     logger.get_logger(__name__).info(f"Menerima pesan dari pengguna dengan ID: {message.from_user.id}")
