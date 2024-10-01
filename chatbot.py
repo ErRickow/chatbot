@@ -22,7 +22,6 @@ API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_NAME = os.getenv("BOT_NAME")
 DEV_NAME = os.getenv("DEV_NAME")
-GROUP_ID = os.getenv("GROUP_ID")# Tambahkan ID grup sebagai variabel lingkungan
 owner = os.getenv("OWNER_ID")
 
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
@@ -43,49 +42,25 @@ async def handle_update(client, message):
     )
     logger.get_logger(__name__).info("Mengirim pesan pembaruan ke pengguna")
 
-# Di bagian atas, setelah import
-user_status = {}
-
 @app.on_message(filters.command("start"))
 async def start(client, message):
     user_id = message.from_user.id
 
-    # Memeriksa apakah pengguna sudah bergabung dengan grup
-    try:
-        member = await client.get_chat_member(GROUP_ID, user_id)
-        if member.status in ['member', 'administrator', 'creator']:
-            # Jika sudah bergabung, kirim pesan selamat datang
-            if user_id not in user_status or user_status[user_id] != "joined":
-                user_status[user_id] = "joined"
-                keyboard = [
-                    {"text": "Developer", "url": "https://t.me/chakszzz"},
-                    {"text": "Channel", "url": "https://t.me/ZeebSupport"},
-                    {"text": "Ubot?", "url": "https://t.me/erprembot"},
-                ]
-                reply_markup = Button().generateInlineButtonGrid(keyboard)
+    # Kirim pesan selamat datang tanpa memeriksa keanggotaan grup
+    keyboard = [
+        {"text": "Developer", "url": "https://t.me/chakszzz"},
+        {"text": "Channel", "url": "https://t.me/ZeebSupport"},
+        {"text": "Ubot?", "url": "https://t.me/erprembot"},
+    ]
+    reply_markup = Button().generateInlineButtonGrid(keyboard)
 
-                await message.reply_text(
-                    f"**👋 Hai {Extract().getMention(message.from_user)}!**\n"
-                    "Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\n"
-                    "Mau aktifin bot? Ketik aja /chatbot on atau gunakan /update untuk melihat fitur baru! ✨\n\n"
-                    "Lu bisa make bot-nya di grup lo ya. Masih project Balu."
-                )
-                logger.get_logger(__name__).info("Mengirim pesan selamat datang")
-        else:
-            if user_id not in user_status or user_status[user_id] != "not_joined":
-                user_status[user_id] = "not_joined"
-                await message.reply_text(
-                    "🔒 **Maaf, kamu harus bergabung dengan grup berikut untuk menggunakan bot ini:**\n"
-                    f"[Bergabung di sini](https://t.me/joinchat/{GROUP_ID})"
-                )
-    except Exception as e:
-        if user_id not in user_status or user_status[user_id] != "not_joined":
-            user_status[user_id] = "not_joined"
-            await message.reply_text("🔒 **Maaf, kamu harus bergabung dengan grup berikut untuk menggunakan bot ini:**\n"
-                                      f"[Bergabung di sini](https://t.me/ZeebSupport)")
-            logger.get_logger(__name__).error(f"Terjadi kesalahan saat memeriksa keanggotaan grup: {str(e)}")
-
-
+    await message.reply_text(
+        f"**👋 Hai {Extract().getMention(message.from_user)}!**\n"
+        "Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\n"
+        "Mau aktifin bot? Ketik aja /chatbot on atau gunakan /update untuk melihat fitur baru! ✨\n\n"
+        "Lu bisa make bot-nya di grup lo ya. Masih project Balu."
+    )
+    logger.get_logger(__name__).info("Mengirim pesan selamat datang")
 
 @app.on_message(filters.command(["bencode", "bdecode"]))
 async def handle_encrypt(client, message):
