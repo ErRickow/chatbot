@@ -9,6 +9,7 @@ from mytools import Api, BinaryEncryptor, Button, Extract, Handler, ImageGen, Lo
 from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
 from pyrogram.errors import FloodWait
+import html
 
 if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
@@ -152,8 +153,14 @@ async def handle_message(client, message):
     await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
     try:
-        result = my_api.ChatBot(message)
-        format_result = f"<blockquote>{result}</blockquote>"
+        result = my_api.ChatBot(f"message")
+        
+        # Escape karakter HTML untuk menghindari masalah HTML injection
+        result_escaped = html.escape(result)
+
+        # Format dengan <blockquote> untuk respons ke pengguna
+        format_result = f"<blockquote>{result_escaped}</blockquote>"
+
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
         await Handler().sendLongPres(message, format_result)
     except FloodWait as e:
