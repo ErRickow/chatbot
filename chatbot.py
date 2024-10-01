@@ -112,7 +112,7 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>", parse_mode='HTML')
             return
 
-        logger.get_logger(__name__).info("Memulai proses update bot.")
+        logger.get_logger(__name__).info("Memulai proses update.")
         try:
             pros = await message.reply(
                 f"<i><blockquote>🔄 {app.me.mention} Sedang memeriksa pembaruan...</blockquote</i>"
