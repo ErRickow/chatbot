@@ -26,7 +26,7 @@ owner = os.getenv("OWNER_ID")
 
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-chatbot_enabled, chat_tagged = {}, []
+chatbot_enabled = {}
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
@@ -46,7 +46,6 @@ async def handle_update(client, message):
 async def start(client, message):
     user_id = message.from_user.id
 
-    # Kirim pesan selamat datang tanpa memeriksa keanggotaan grup
     keyboard = [
         {"text": "Developer", "url": "https://t.me/chakszzz"},
         {"text": "Channel", "url": "https://t.me/ZeebSupport"},
@@ -103,6 +102,7 @@ async def handle_clear_message(client, message):
     )
 )
 async def handle_message(client, message):
+    # Check if chatbot is enabled for the user
     if not chatbot_enabled.get(message.from_user.id, False):
         return
 
@@ -114,6 +114,8 @@ async def handle_message(client, message):
         result = my_api.ChatBot(message)
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
         await Handler().sendLongPres(message, result)
+    except FloodWait as e:
+        await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
         await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)}")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
@@ -140,6 +142,8 @@ async def handle_tts(client, message):
 
         logger.get_logger(__name__).info(f"Berhasil mengirimkan {command} ke user ID {message.from_user.id}")
         await msg.delete()
+    except FloodWait as e:
+        await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
         logger.get_logger(__name__).error(f"Error generating {command}: {e}")
         await msg.edit(f"Error: {str(e)}")
@@ -163,6 +167,8 @@ async def handle_khodam(client, message):
         await Handler().sendLongPres(message, result)
         await msg.delete()
         logger.get_logger(__name__).info(f"Berhasil mendapatkan info khodam: {full_name}")
+    except FloodWait as e:
+        await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
         await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)}")
         await msg.delete()
@@ -184,6 +190,8 @@ async def handle_image(client, message):
         await client.send_photo(message.chat.id, image, caption=prompt)
         await msg.delete()
         logger.get_logger(__name__).info("Mengirim gambar berhasil.")
+    except FloodWait as e:
+        await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
         await msg.edit(f"Terjadi kesalahan: {str(e)}")
         logger.get_logger(__name__).error(f"Terjadi kesalahan saat menghasilkan gambar: {str(e)}")
