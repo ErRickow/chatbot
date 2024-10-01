@@ -40,7 +40,7 @@ async def start(client, message):
     user_id = message.from_user.id
 
     keyboard = [
-        {"text": "Devs0", "url": "https://t.me/chakszzz"}, {"text": "Devs1", "url": "https://t.me/paveldurov"},
+        {"text": "Developer", "url": "https://t.me/chakszzz"},
         {"text": "Join", "url": "https://t.me/ZeebSupport"},
         {"text": "Other Bot", "url": "https://t.me/erprembot"},
     ]
@@ -155,7 +155,7 @@ async def handle_message(client, message):
         result = my_api.ChatBot(f"message")
         format_result = f"<blockquote>{result}</blockquote>"
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
-        await message.reply_text(format_result)
+        await Handler().sendLongPres(message, format_result)
     except FloodWait as e:
         await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
