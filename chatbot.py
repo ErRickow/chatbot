@@ -104,7 +104,7 @@ async def handle_message(client, message):
 
             if "Already up to date." in str(out):
                 return await pros.edit(
-                    f"<blockquote>✅ Pembaruan berhasil! Bot sudah terbaru.</blockquote>"
+                    f"<blockquote>✅ {app.me.mention} sudah terbaru.</blockquote>"
                 )
 
             # Menghapus informasi commit
@@ -112,7 +112,7 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui.</blockquote>"
             )
 
-            os.execl(sys.executable, sys.executable, "-m", "Ah")
+            os.execl(sys.executable, sys.executable, "chatbot.py")
 
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat memperbarui: {e}")
