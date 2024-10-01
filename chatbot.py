@@ -36,14 +36,14 @@ binary = BinaryEncryptor(1945)
 async def start(client, message):
     user = message.from_user
     keyboard = [
-        {"text": "developer", "url": "https://t.me/NorSodikin"},
-        {"text": "channel", "url": "https://t.me/FakeCodeX"},
-        {"text": "repository", "url": "https://github.com/SenpaiSeeker/chatbot"},
+        {"text": "developer", "url": "https://t.me/chakszzz"},
+        {"text": "channel", "url": "https://t.me/ZeebSupport"},
+        {"text": "ubot?", "url": "https://t.me/erprembot"},
     ]
     reply_markup = Button().generateInlineButtonGrid(keyboard)
 
     await message.reply_text(
-        f"**👋 Hai {Extract().getMention(user)}! Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\nMau aktifin bot? Ketik aja /chatbot on**",
+        f"**👋 Hai {Extract().getMention(user)}! Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\nMau aktifin bot? Ketik aja /chatbot on**\n\nLu Bisa Make Bot Nya Di Group Lo Ya. Masih Project Balu",
         reply_markup=reply_markup,
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang")
