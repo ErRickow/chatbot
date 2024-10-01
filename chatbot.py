@@ -109,7 +109,7 @@ async def handle_message(client, message):
 
     if "update" in text:
         if message.from_user.id not in OWNER_IDS:
-            await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>")
+            await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>", parse_mode='HTML')
             return
 
         logger.get_logger(__name__).info("Memulai proses update bot.")
