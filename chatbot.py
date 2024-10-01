@@ -47,7 +47,7 @@ async def start(client, message):
     reply_markup = Button().generateInlineButtonGrid(keyboard)
 
     await message.reply_text(
-        f"**👋 Hai {Extract().getMention(message.from_user)}!**\nKenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\nLu bisa make bot-nya di grup lo ya. Masih project Balu.",
+        f"<blockquote><b>👋 Hai {Extract().getMention(message.from_user)}!</b>\nKenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\nLu bisa make bot-nya di grup lo ya. Masih project Balu.\n\nbtw <b>KALO MO MAKE BOTNYA JANGAN SPAM YA MEK. KALO SPAM GW LAPORIN MAKLO DAH!</b></blockquote>",
         reply_markup=reply_markup,
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang")
@@ -87,7 +87,7 @@ async def handle_message(client, message):
 
         try:
             chatbot_active = True
-            await message.reply("Chatbot sekarang **aktif**! 🎉")
+            await message.reply("<blockquote>Chatbot sekarang <b>aktif</b>! 🎉</blockquote>")
             logger.get_logger(__name__).info("Chatbot Aktif.")
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️")
@@ -100,7 +100,7 @@ async def handle_message(client, message):
 
         try:
             chatbot_active = False
-            await message.reply("Chatbot sekarang **non-aktif**. ❌")
+            await message.reply("<blockquote>Chatbot sekarang <b>non-aktif❌</blockquote>")
             logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️")
@@ -115,7 +115,7 @@ async def handle_message(client, message):
         logger.get_logger(__name__).info("Memulai proses update bot.")
         try:
             pros = await message.reply(
-                f"<i>🔄 {app.me.mention} Sedang memeriksa pembaruan...</i>"
+                f"<i><blockquote>🔄 {app.me.mention} Sedang memeriksa pembaruan...</blockquote></i>"
             )
             out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
 
@@ -152,9 +152,10 @@ async def handle_message(client, message):
     await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
     try:
-        result = my_api.ChatBot(message)
+        result = my_api.ChatBot(f"message")
+        format_result = f"<blockquote>{result}</blockquote>"
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
-        await Handler().sendLongPres(message, result)
+        await Handler().sendLongPres(message, format_result)
     except FloodWait as e:
         await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
