@@ -23,7 +23,7 @@ DEV_NAME = os.getenv("DEV_NAME")
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # All users can interact with the chatbot
-chatbot_enabled = defaultdict(lambda: True)  # Default to True for all users
+chatbot_active = True  # Initialize chatbot status as active
 user_last_response_time = defaultdict(lambda: 0)  # Dictionary to track user response times
 response_cooldown = 3  # Cooldown duration in seconds
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
@@ -77,15 +77,23 @@ async def handle_clear_message(client, message):
     clear = my_api.clear_chat_history(message.from_user.id)
     await message.reply(clear)
 
-@app.on_message(
-    filters.text
-    & ~filters.bot
-    & ~filters.me
-    & ~filters.command(
-        ["start", "image", "tagall", "cancel", "clear", "khodam", "tts", "tr", "bencode", "bdecode", "eval"]
-    )
-)
+@app.on_message(filters.text & ~filters.bot & ~filters.me & ~filters.bot & filters.group)
 async def handle_message(client, message):
+    global chatbot_active  # Ensure we can modify the global variable
+
+    # Check if the message text is "on" or "off" to set the chatbot's active status
+    text = message.text.lower()
+    if "on" in text:
+        chatbot_active = True
+        await message.reply("Chatbot sekarang **aktif**.")
+        logger.get_logger(__name__).info("Chatbot diaktifkan.")
+        return
+    elif "off" in text:
+        chatbot_active = False
+        await message.reply("Chatbot sekarang **non-aktif**.")
+        logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
+        return
+
     # Cooldown mechanism
     current_time = time.time()
     last_response_time = user_last_response_time[message.from_user.id]
@@ -97,8 +105,8 @@ async def handle_message(client, message):
     # Update last response time
     user_last_response_time[message.from_user.id] = current_time
 
-    # Check if chatbot is enabled for the chat (which is always True now)
-    if not chatbot_enabled.get(message.chat.id, True):  
+    # Check if chatbot is active before processing
+    if not chatbot_active:  
         return
 
     logger.get_logger(__name__).info(f"Menerima pesan dari pengguna dengan ID: {message.from_user.id}")
