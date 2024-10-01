@@ -128,7 +128,7 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
-            os.execl(sys.executable, sys.executable, "chatbot.py")
+            os.execl(sys.executable, sys.executable, "start", "1")
 
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat memperbarui: {e} ⚠️")
