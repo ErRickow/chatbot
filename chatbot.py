@@ -92,13 +92,13 @@ async def handle_message(client, message):
     if "update" in text:
         # Cek apakah pengguna adalah pemilik bot
         if message.from_user.id != OWNER_ID:
-            await message.reply("Anda tidak memiliki izin untuk melakukan pembaruan.")
+            await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>")
             return
 
         logger.get_logger(__name__).info("Memulai proses update bot.")
         try:
             pros = await message.reply(
-                f"<i>Memeriksa pembaruan untuk {app.me.mention}...</i>"
+                f"<i>🔄 {app.me.mention} Sedang diperiksa pembaruan nya...</i>"
             )
             out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
 
