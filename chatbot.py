@@ -95,7 +95,7 @@ async def handle_message(client, message):
             await message.reply("Anda tidak memiliki izin untuk melakukan pembaruan.")
             return
 
-        logger.info("Memulai proses update bot.")
+        logger.get_logger(__name__).info("Memulai proses update bot.")
         try:
             pros = await message.reply(
                 f"<i>Memeriksa pembaruan untuk {app.me.mention}...</i>"
