@@ -47,9 +47,7 @@ async def start(client, message):
     reply_markup = Button().generateInlineButtonGrid(keyboard)
 
     await message.reply_text(
-        f"**👋 Hai {Extract().getMention(message.from_user)}!**\n",
-        "Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\n",
-        "Lu bisa make bot-nya di grup lo ya. Masih project Balu.",
+        f"**👋 Hai {Extract().getMention(message.from_user)}!**\nKenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\nLu bisa make bot-nya di grup lo ya. Masih project Balu.",
         reply_markup=reply_markup,
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang")
