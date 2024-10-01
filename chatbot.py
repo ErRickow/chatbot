@@ -203,4 +203,5 @@ async def handle_image(client, message):
         await msg.edit(f"Terjadi kesalahan: {str(e)}")
         logger.get_logger(__name__).error(f"Terjadi kesalahan saat menghasilkan gambar: {str(e)}")
 
+if __name__ == "__main__":
     app.run()
