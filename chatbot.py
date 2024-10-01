@@ -152,7 +152,7 @@ async def handle_message(client, message):
     await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
     try:
-        result = my_api.ChatBot(f"message")
+        result = my_api.ChatBot("message")
         format_result = f"<blockquote>{result}</blockquote>"
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
         await Handler().sendLongPres(message, format_result)
