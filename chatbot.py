@@ -10,6 +10,10 @@ from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
 from pyrogram.errors import FloodWait
 
+if len(sys.argv) < 2:
+    print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
+    sys.exit(1)  # Keluar dari program dengan status error
+
 load_dotenv(sys.argv[1])
 
 logger = LoggerHandler()
