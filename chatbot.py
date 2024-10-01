@@ -69,36 +69,51 @@ async def handle_clear_message(client, message):
     await message.reply(clear)
 
 # Di bagian atas kode, tambahkan variabel untuk menyimpan ID pemilik bot
-OWNER_ID = 1448273246  # Ganti dengan ID pemilik bot Anda
+# Di bagian atas kode, ganti dengan daftar ID pemilik bot
+OWNER_IDS = [1448273246, 6607703424]
+SETUJU = [1448273246, 6607703424, 940232666, 1325957770]
 
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
-    global chatbot_active  # Ensure we can modify the global variable
+    global chatbot_active
 
-    # Check if the message text is "on" or "off" to set the chatbot's active status
     text = message.text.lower()
     if "on" in text:
-        chatbot_active = True
-        await message.reply("Chatbot sekarang **aktif**.")
-        logger.get_logger(__name__).info("Chatbot diaktifkan.")
+        if message.from_user.id not in SETUJU:
+            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
+            return
+
+        try:
+            chatbot_active = True
+            await message.reply("Chatbot sekarang **aktif**! 🎉")
+            logger.get_logger(__name__).info("Chatbot Aktif.")
+        except Exception as e:
+            await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️")
+            logger.error(f"Error saat mengaktifkan chatbot: {e}")
         return
     elif "off" in text:
-        chatbot_active = False
-        await message.reply("Chatbot sekarang **non-aktif**.")
-        logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
+        if message.from_user.id not in SETUJU:
+            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
+            return
+
+        try:
+            chatbot_active = False
+            await message.reply("Chatbot sekarang **non-aktif**. ❌")
+            logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
+        except Exception as e:
+            await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️")
+            logger.error(f"Error saat menonaktifkan chatbot: {e}")
         return
 
-    # Ganti bagian ini
     if "update" in text:
-        # Cek apakah pengguna adalah pemilik bot
-        if message.from_user.id != OWNER_ID:
+        if message.from_user.id not in OWNER_IDS:
             await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>")
             return
 
         logger.get_logger(__name__).info("Memulai proses update bot.")
         try:
             pros = await message.reply(
-                f"<i>🔄 {app.me.mention} Sedang diperiksa pembaruan nya...</i>"
+                f"<i>🔄 {app.me.mention} Sedang memeriksa pembaruan...</i>"
             )
             out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
 
@@ -107,31 +122,26 @@ async def handle_message(client, message):
                     f"<blockquote>✅ {app.me.mention} sudah terbaru.</blockquote>"
                 )
 
-            # Menghapus informasi commit
             await pros.edit(
-                f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui.</blockquote>"
+                f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
             os.execl(sys.executable, sys.executable, "chatbot.py")
 
         except Exception as e:
-            await message.reply(f"Terjadi kesalahan saat memperbarui: {e}")
+            await message.reply(f"Terjadi kesalahan saat memperbarui: {e} ⚠️")
             logger.error(f"Error saat memperbarui bot: {e}")
 
         return
 
-    # Cooldown mechanism
     current_time = time.time()
     last_response_time = user_last_response_time[message.from_user.id]
 
-    # Check if the cooldown has expired
     if current_time - last_response_time < response_cooldown:
-        return  # Do not respond if within cooldown period
+        return
 
-    # Update last response time
     user_last_response_time[message.from_user.id] = current_time
 
-    # Check if chatbot is active before processing
     if not chatbot_active:  
         return
 
@@ -146,7 +156,7 @@ async def handle_message(client, message):
     except FloodWait as e:
         await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
-        await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)}")
+        await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)} ⚠️")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
 
 @app.on_message(filters.command(["tts", "tr"]))
