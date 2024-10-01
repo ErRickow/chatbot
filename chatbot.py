@@ -31,17 +31,6 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
-@app.on_message(filters.command("update"))
-async def handle_update(client, message):
-    await message.reply_text(
-        "✨ **Chatbot telah diperbarui!** \n\n"
-        "🚀 Fitur-fitur baru telah ditambahkan untuk meningkatkan pengalaman Anda. \n"
-        "🤖 Sekarang chatbot bisa memberikan jawaban yang lebih cepat dan akurat! \n\n"
-        "Silakan coba dan beri tahu kami jika ada saran atau masukan. \n"
-        "Terima kasih telah menggunakan bot kami! 🙏"
-    )
-    logger.get_logger(__name__).info("Mengirim pesan pembaruan ke pengguna")
-
 @app.on_message(filters.command("start"))
 async def start(client, message):
     user_id = message.from_user.id
@@ -56,7 +45,7 @@ async def start(client, message):
     await message.reply_text(
         f"**👋 Hai {Extract().getMention(message.from_user)}!**\n"
         "Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\n"
-        "Lu bisa make bot-nya di grup lo ya. Masih project Balu."
+        "Lu bisa make bot-nya di grup lo ya. Masih project Balu.",
         reply_markup=reply_markup,
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang")
