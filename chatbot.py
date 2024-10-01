@@ -32,7 +32,7 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
-@app.on_message(filters.command("update") & filters(owner))
+@app.on_message(filters.command("update") & filters.user(owner))
 async def handle_update(client, message):
     await message.reply_text(
         "✨ **Chatbot telah diperbarui!** \n\n"
