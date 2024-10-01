@@ -40,7 +40,7 @@ async def start(client, message):
     user_id = message.from_user.id
 
     keyboard = [
-        {"text": "Devs0", "url": "https://t.me/chakszzz"}, {"text": "Devs1", "url": "https://t.me/paveldurov"}
+        {"text": "Devs0", "url": "https://t.me/chakszzz"}, {"text": "Devs1", "url": "https://t.me/paveldurov"},
         {"text": "Join", "url": "https://t.me/ZeebSupport"},
         {"text": "Other Bot", "url": "https://t.me/erprembot"},
     ]
