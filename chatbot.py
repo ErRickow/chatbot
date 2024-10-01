@@ -73,14 +73,14 @@ async def handle_clear_message(client, message):
 # Di bagian atas kode, tambahkan variabel untuk menyimpan ID pemilik bot
 # Di bagian atas kode, ganti dengan daftar ID pemilik bot
 OWNER_IDS = [1448273246, 6607703424]
-SETUJU = [1448273246, 6607703424, 940232666, 1325957770]
+SETUJU = [6607703424, 940232666, 1325957770]
 
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
     global chatbot_active
 
     text = message.text.lower()
-    if "on" in text:
+    if "aktif" in text or "syalala" in text:
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
             return
@@ -93,7 +93,7 @@ async def handle_message(client, message):
             await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️")
             logger.error(f"Error saat mengaktifkan chatbot: {e}")
         return
-    elif "off" in text:
+    elif "nonaktif" in text or "cukup" in text:
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
             return
