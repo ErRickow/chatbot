@@ -2,6 +2,7 @@ import asyncio
 import os
 import sys
 import time
+import subprocess
 from collections import defaultdict
 from dotenv import load_dotenv
 from mytools import Api, BinaryEncryptor, Button, Extract, Handler, ImageGen, LoggerHandler, Translate
@@ -56,6 +57,7 @@ async def start(client, message):
         f"**👋 Hai {Extract().getMention(message.from_user)}!**\n"
         "Kenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\n"
         "Lu bisa make bot-nya di grup lo ya. Masih project Balu."
+        reply_markup=reply_markup,
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang")
 
@@ -77,7 +79,10 @@ async def handle_clear_message(client, message):
     clear = my_api.clear_chat_history(message.from_user.id)
     await message.reply(clear)
 
-@app.on_message(filters.text & ~filters.bot & ~filters.me & ~filters.bot & filters.group)
+# Di bagian atas kode, tambahkan variabel untuk menyimpan ID pemilik bot
+OWNER_ID = 1448273246  # Ganti dengan ID pemilik bot Anda
+
+@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
     global chatbot_active  # Ensure we can modify the global variable
 
@@ -92,6 +97,38 @@ async def handle_message(client, message):
         chatbot_active = False
         await message.reply("Chatbot sekarang **non-aktif**.")
         logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
+        return
+
+    # Ganti bagian ini
+    if "update" in text:
+        # Cek apakah pengguna adalah pemilik bot
+        if message.from_user.id != OWNER_ID:
+            await message.reply("Anda tidak memiliki izin untuk melakukan pembaruan.")
+            return
+
+        logger.info("Memulai proses update bot.")
+        try:
+            pros = await message.reply(
+                f"<i>Memeriksa pembaruan untuk {app.me.mention}...</i>"
+            )
+            out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
+
+            if "Already up to date." in str(out):
+                return await pros.edit(
+                    f"<blockquote>✅ Pembaruan berhasil! Bot sudah terbaru.</blockquote>"
+                )
+
+            # Menghapus informasi commit
+            await pros.edit(
+                f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui.</blockquote>"
+            )
+
+            os.execl(sys.executable, sys.executable, "-m", "Ah")
+
+        except Exception as e:
+            await message.reply(f"Terjadi kesalahan saat memperbarui: {e}")
+            logger.error(f"Error saat memperbarui bot: {e}")
+
         return
 
     # Cooldown mechanism
