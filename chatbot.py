@@ -1,14 +1,11 @@
 import asyncio
 import os
-import random
 import sys
-import traceback
-from io import StringIO
-from time import time
-
+import time
+from collections import defaultdict
 from dotenv import load_dotenv
 from mytools import Api, BinaryEncryptor, Button, Extract, Handler, ImageGen, LoggerHandler, Translate
-from pyrogram import Client, emoji, filters
+from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
 from pyrogram.errors import FloodWait
 
@@ -22,16 +19,17 @@ API_HASH = os.getenv("API_HASH")
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 BOT_NAME = os.getenv("BOT_NAME")
 DEV_NAME = os.getenv("DEV_NAME")
-owner = os.getenv("OWNER_ID")
 
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 chatbot_enabled = {}
+user_last_response_time = defaultdict(lambda: 0)  # Dictionary to track user response times
+response_cooldown = 3  # Cooldown duration in seconds
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
-@app.on_message(filters.command("update") & filters.user(owner))
+@app.on_message(filters.command("update"))
 async def handle_update(client, message):
     await message.reply_text(
         "✨ **Chatbot telah diperbarui!** \n\n"
@@ -103,6 +101,17 @@ async def handle_clear_message(client, message):
     )
 )
 async def handle_message(client, message):
+    # Cooldown mechanism
+    current_time = time.time()
+    last_response_time = user_last_response_time[message.from_user.id]
+
+    # Check if the cooldown has expired
+    if current_time - last_response_time < response_cooldown:
+        return  # Do not respond if within cooldown period
+
+    # Update last response time
+    user_last_response_time[message.from_user.id] = current_time
+
     # Check if chatbot is enabled for the user
     if not chatbot_enabled.get(message.from_user.id, False):
         return
@@ -195,7 +204,8 @@ async def handle_image(client, message):
         await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
         await msg.edit(f"Terjadi kesalahan: {str(e)}")
-        logger.get_logger(__name__).error(f"Terjadi kesalahan saat menghasilkan gambar: {str(e)}")
+        await msg.delete()
+        logger.get_logger(__name__).error(f"Error generating image: {e}")
 
 if __name__ == "__main__":
     app.run()
