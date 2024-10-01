@@ -115,7 +115,7 @@ async def handle_message(client, message):
         logger.get_logger(__name__).info("Memulai proses update bot.")
         try:
             pros = await message.reply(
-                f"<i><blockquote>🔄 {app.me.mention} Sedang memeriksa pembaruan...</blockquote></i>"
+                f"<i><blockquote>🔄 {app.me.mention} Sedang memeriksa pembaruan...</blockquote</i>"
             )
             out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
 
