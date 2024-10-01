@@ -147,7 +147,7 @@ async def handle_message(client, message):
     if not chatbot_active:  
         return
 
-    logger.get_logger(__name__).info(f"Menerima pesan dari pengguna dengan ID: {message.from_user.id}")
+    logger.get_logger(__name__).info(f"Menerima pesan dari pengguna dengan ID: [{message.from_user.id}]")
 
     await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
