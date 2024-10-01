@@ -73,7 +73,7 @@ async def start(client, message):
             )
     except Exception as e:
         await message.reply_text("🔒 **Maaf, kamu harus bergabung dengan grup berikut untuk menggunakan bot ini:**\n"
-                                  f"[Bergabung di sini](https://t.me/joinchat/{GROUP_ID})")
+                                  f"[Bergabung di sini](https://t.me/ZeebSupport)")
         logger.get_logger(__name__).error(f"Terjadi kesalahan saat memeriksa keanggotaan grup: {str(e)}")
 
 @app.on_message(filters.command(["bencode", "bdecode"]))
