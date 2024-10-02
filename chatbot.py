@@ -12,7 +12,7 @@ from pyrogram.errors import FloodWait
 
 if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
-    sys.exit(1)  # Keluar dari program dengan status error
+    sys.exit(1) 
 
 load_dotenv(sys.argv[1])
 
@@ -27,10 +27,9 @@ DEV_NAME = os.getenv("DEV_NAME")
 
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-# All users can interact with the chatbot
-chatbot_active = False  # Initialize chatbot status as active
+chatbot_active = False  
 user_last_response_time = defaultdict(lambda: 0)  # Dictionary to track user response times
-response_cooldown = 3  # Cooldown duration in seconds
+response_cooldown = 5  # Cooldown duration in seconds
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
