@@ -115,6 +115,9 @@ async def handle_message(client, message):
         try:
             clear = my_api.clear_chat_history(message.from_user.id)
             await message.reply(clear)
+        except Exception as e:
+            await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️")
+            logger.error(f"Error saat menonaktifkan chatbot: {e}")
             return
 
     if "update" in text:
