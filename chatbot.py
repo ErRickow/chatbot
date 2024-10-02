@@ -73,7 +73,7 @@ async def handle_clear_message(client, message):
 OWNER_IDS = [1448273246, 6607703424]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
 
-whitelisted_groups = { -1002166668579 }
+whitelisted_groups = set()
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 2000
@@ -231,8 +231,6 @@ async def handle_message(client, message):
         else:
             await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
     
-    except FloodWait as e:
-        await asyncio.sleep(e.x)
     except Exception as e:
         await message.reply(f"<blockquote>Terjadi kesalahan: {str(e)} ⚠️</blockquote>")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
