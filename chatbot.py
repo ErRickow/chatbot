@@ -139,7 +139,6 @@ async def handle_message(client, message):
             logger.get_logger(__name__).info(f"Grup {message.chat.title} diblacklist.")
         return
 
-    # Menghapus grup dari whitelist atau blacklist jika perintah "remove" diberikan oleh OWNER
     if "remove" in text and message.from_user.id in OWNER_IDS:
         try:
             # Ekstraksi ID grup dari teks
@@ -181,7 +180,7 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat mengaktifkan chatbot: {e}")
         return
-    elif "nonaktif" in text or "cukup" in text:
+    elif "diam" in text or "cukup" in text:
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
             return
