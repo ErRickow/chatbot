@@ -187,7 +187,7 @@ async def handle_message(client, message):
     # Update bot
     if "update" in text:
         if message.from_user.id not in OWNER_IDS:
-            await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>", parse_mode='HTML')
+            await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>")
             return
 
         logger.get_logger(__name__).info("Memulai proses update.")
@@ -260,7 +260,7 @@ async def handle_tts(client, message):
         logger.get_logger(__name__).info(f"Berhasil mengirimkan {command} ke user ID {message.from_user.id}")
         await msg.delete()
     except FloodWait as e:
-        await asyncio.sleep(e.x)  # Wait for the required time before retrying
+        await asyncio.sleep(e.x)
     except Exception as e:
         logger.get_logger(__name__).error(f"Error generating {command}: {e}")
         await msg.edit(f"Error: {str(e)}")
