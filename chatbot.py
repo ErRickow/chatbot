@@ -29,7 +29,7 @@ app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot
 
 chatbot_active = False  
 user_last_response_time = defaultdict(lambda: 0)  # Dictionary to track user response times
-response_cooldown = 5  # Cooldown duration in seconds
+response_cooldown = 2  # Cooldown duration in seconds
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
