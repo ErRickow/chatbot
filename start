@@ -1,24 +1,27 @@
 #!/bin/bash
 
+# Define the name of the environment file you want to use
+DEFAULT_ENV_FILE=".env"
+
 create_env_file() {
-    read -p "Silakan masukkan nama env yang ingin dibuat, contoh: robot.env: " name_env
-    touch "$name_env"
+    echo "Membuat file env: $DEFAULT_ENV_FILE"
+    touch "$DEFAULT_ENV_FILE"
 
     declare -a env_variables=("API_ID" "API_HASH" "BOT_TOKEN" "BOT_NAME" "DEV_NAME")
     for var in "${env_variables[@]}"; do
         read -p "Masukkan $var: " value
-        echo "$var=$value" >> "$name_env"
+        echo "$var=$value" >> "$DEFAULT_ENV_FILE"
     done
 
     read -p "Apakah file env sudah diisi dengan konfigurasi yang benar? (y/n): " env_configured
     if [ "$env_configured" != "y" ]; then
-        rm "$name_env"
+        rm "$DEFAULT_ENV_FILE"
         create_env_file
     else
-        echo "$name_env telah dibuat."
+        echo "$DEFAULT_ENV_FILE telah dibuat."
         read -p "Apakah Anda ingin menjalankan env yang baru dibuat? (y/n): " run_new_env
         if [ "$run_new_env" == "y" ]; then
-            git pull && rm -rf *.session* && python3 chatbot.py "$name_env"
+            git pull && rm -rf *.session* && python3 chatbot.py "$DEFAULT_ENV_FILE"
             exit 0
         fi
     fi
@@ -36,27 +39,17 @@ list_env_files() {
         fi
     fi
 
-    env_files=($(find . -maxdepth 1 -type f -name "*.env" -exec basename {} \;))
-    echo "Daftar file env yang ditemukan:"
-    for i in "${!env_files[@]}"; do
-        echo "$((i+1)). ${env_files[$i]}"
-    done
+    echo "Memeriksa keberadaan file env: $DEFAULT_ENV_FILE"
+    if [[ ! " ${env_files[@]} " =~ " $DEFAULT_ENV_FILE " ]]; then
+        echo "$DEFAULT_ENV_FILE tidak ditemukan. Membuat file baru."
+        create_env_file
+    else
+        echo "$DEFAULT_ENV_FILE ditemukan."
+    fi
 }
 
-select_env_file() {
-    while true; do
-        read -p "Silakan masukkan angka sesuai env yang ingin digunakan: " choice
-
-        if [[ $choice -gt 0 && $choice -le ${#env_files[@]} ]]; then
-            FILE_ENV="${env_files[$((choice-1))]}"
-            break
-        else
-            echo "Pilihan tidak valid. Silakan masukkan angka yang benar."
-        fi
-    done
-}
-
+# Check for existing env files and proceed accordingly
 list_env_files
-select_env_file
 
-git pull && rm -rf *.session* && python3 chatbot.py "$FILE_ENV"
+# Run the Python script with the specified env file
+git pull && rm -rf *.session* && python3 chatbot.py "$DEFAULT_ENV_FILE"
