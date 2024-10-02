@@ -86,7 +86,7 @@ async def paginate_response(response, message):
     for i in range(0, len(response), PAGE_SIZE):
         await message.reply(response[i:i + PAGE_SIZE], quote=True)
 
-@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group & filters.reply)
+@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group & ~filters.reply_to_user)
 async def handle_message(client, message):
     global chatbot_active
 
