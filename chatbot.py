@@ -28,7 +28,7 @@ DEV_NAME = os.getenv("DEV_NAME")
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
 # All users can interact with the chatbot
-chatbot_active = True  # Initialize chatbot status as active
+chatbot_active = False  # Initialize chatbot status as active
 user_last_response_time = defaultdict(lambda: 0)  # Dictionary to track user response times
 response_cooldown = 3  # Cooldown duration in seconds
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
@@ -152,7 +152,7 @@ async def handle_message(client, message):
     await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
     try:
-        result = my_api.ChatBot(message)
+        result = my_api.ChatBot(f"<blockquote>message</blockquote>")
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
         await Handler().sendLongPres(message, result)
     except FloodWait as e:
