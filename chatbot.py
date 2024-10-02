@@ -40,8 +40,9 @@ async def start(client, message):
 
     keyboard = [
         {"text": "Developer", "url": "https://t.me/chakszzz"},
-        {"text": "Join", "url": "https://t.me/ZeebSupport"},
+        {"text": "visit", "url": "https://t.me/ZeebSupport"},
         {"text": "Other Bot", "url": "https://t.me/erprembot"},
+        {"text": "visit here too", "url": "https://t.me/" 
     ]
     reply_markup = Button().generateInlineButtonGrid(keyboard)
 
@@ -74,7 +75,7 @@ async def handle_clear_message(client, message):
 OWNER_IDS = [1448273246, 6607703424]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
 
-whitelisted_groups = set()
+whitelisted_groups = set(-1002166668579)
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 2000  # Max characters allowed in the response
@@ -108,7 +109,6 @@ async def handle_message(client, message):
 
     group_id = message.chat.id
 
-    # Cek apakah grup ada di blacklist
     if group_id in blacklisted_groups:
         logger.get_logger(__name__).info(f"Pesan diabaikan, grup {message.chat.title} ada di blacklist.")
         return
@@ -158,7 +158,6 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
         return
 
-    # Menampilkan daftar grup yang di-whitelist dan di-blacklist
     if "list" in text and message.from_user.id in OWNER_IDS:
         whitelisted_list = "\n".join([str(gid) for gid in whitelisted_groups]) or "Tidak ada grup dalam whitelist."
         blacklisted_list = "\n".join([str(gid) for gid in blacklisted_groups]) or "Tidak ada grup dalam blacklist."
@@ -166,7 +165,6 @@ async def handle_message(client, message):
         await message.reply(f"<blockquote><b>Grup Whitelist:</b>\n{whitelisted_list}\n\n<b>Grup Blacklist:</b>\n{blacklisted_list}</blockquote>")
         return
 
-    # Aktifkan atau nonaktifkan chatbot
     if "aktif" in text or "syalala" in text:
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
@@ -226,7 +224,6 @@ async def handle_message(client, message):
 
         return
 
-    # Logika chatbot untuk merespon pesan (hanya berjalan jika bot aktif)
     if not chatbot_active:
         return
 
@@ -241,7 +238,6 @@ async def handle_message(client, message):
         if len(result) > MAX_RESPONSE_LENGTH:
             result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
 
-        # Jika hasil lebih panjang dari PAGE_SIZE, gunakan pagination
         if len(result) > PAGE_SIZE:
             await paginate_response(result, message)
         else:
