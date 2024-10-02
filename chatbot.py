@@ -87,7 +87,7 @@ async def handle_message(client, message):
 
         try:
             chatbot_active = True
-            await message.reply("<blockquote>Chatbot sekarang <b>aktif</b>! 🎉</blockquote>")
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>aktif</b>! 🎉</blockquote>")
             logger.get_logger(__name__).info("Chatbot Aktif.")
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️")
@@ -100,7 +100,7 @@ async def handle_message(client, message):
 
         try:
             chatbot_active = False
-            await message.reply("<blockquote>Chatbot sekarang <b>non-aktif❌</blockquote>")
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>non-aktif❌</blockquote>")
             logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️")
