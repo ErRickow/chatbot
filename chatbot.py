@@ -128,7 +128,7 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
-            subprocess.run(["bash start"])
+            subprocess.run(["start"], shell=True)
 
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat memperbarui: {e} ⚠️")
@@ -152,9 +152,9 @@ async def handle_message(client, message):
     await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
 
     try:
-        result = my_api.ChatBot(message)
+        result = my_api.ChatBot(f"<blockquote>message</blockquote>")
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
-        await Handler().sendLongPres(result)
+        await Handler().sendLongPres(message, result)
     except FloodWait as e:
         await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
