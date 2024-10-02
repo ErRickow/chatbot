@@ -155,7 +155,7 @@ async def handle_message(client, message):
         result = my_api.ChatBot(message)
         anu = ("> result")
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
-        await Handler().sendLongPres(message, result)
+        await Handler().sendLongPres(message, anu)
     except FloodWait as e:
         await asyncio.sleep(e.x)  # Wait for the required time before retrying
     except Exception as e:
