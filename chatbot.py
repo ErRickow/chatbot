@@ -166,7 +166,7 @@ async def handle_message(client, message):
 
     try:
         result = my_api.ChatBot(message)
-        anu = "<blockquote>" + result + "\n©<a href=tg://user?id=1448273246> layers</a>" + "</blockquote>"
+        anu = "<blockquote>" + result + "\n©<a href=tg://user?id=1448273246>er👤</a>" + "</blockquote>"
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
         await Handler().sendLongPres(message, anu)
     except FloodWait as e:
