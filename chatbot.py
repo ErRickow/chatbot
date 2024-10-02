@@ -116,6 +116,7 @@ async def handle_message(client, message):
             clear = my_api.clear_chat_history(message.from_user.id)
             await message.reply(clear)
             return
+
     if "update" in text:
         if message.from_user.id not in OWNER_IDS:
             await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>", parse_mode='HTML')
