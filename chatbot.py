@@ -70,16 +70,14 @@ async def handle_clear_message(client, message):
     clear = my_api.clear_chat_history(message.from_user.id)
     await message.reply(clear)
 
-# Di bagian atas kode, tambahkan variabel untuk menyimpan ID pemilik bot
-# Di bagian atas kode, ganti dengan daftar ID pemilik bot
 OWNER_IDS = [1448273246, 6607703424]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
 
 whitelisted_groups = set(-1002166668579)
 blacklisted_groups = set()
 
-MAX_RESPONSE_LENGTH = 2000  # Max characters allowed in the response
-PAGE_SIZE = 500  # Number of characters per page for pagination
+MAX_RESPONSE_LENGTH = 2000
+PAGE_SIZE = 500  
 
 async def paginate_response(response, message):
     """
@@ -95,13 +93,11 @@ async def handle_message(client, message):
     text = message.text.lower()
     current_time = time.time()
 
-    # Inisialisasi user_last_response_time jika user belum ada di dalamnya
     if message.from_user.id not in user_last_response_time:
         user_last_response_time[message.from_user.id] = 0
 
     last_response_time = user_last_response_time[message.from_user.id]
 
-    # Cek cooldown untuk pesan dari pengguna
     if current_time - last_response_time < response_cooldown:
         return
 
@@ -113,11 +109,9 @@ async def handle_message(client, message):
         logger.get_logger(__name__).info(f"Pesan diabaikan, grup {message.chat.title} ada di blacklist.")
         return
 
-    # Cek apakah grup ada di whitelist
     if group_id not in whitelisted_groups and "add" not in text:
         return
 
-    # Menambahkan grup ke whitelist jika perintah "add" diberikan oleh OWNER
     if "add" in text and message.from_user.id in OWNER_IDS:
         if group_id in whitelisted_groups:
             await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di whitelist.</blockquote>")
@@ -127,21 +121,19 @@ async def handle_message(client, message):
             logger.get_logger(__name__).info(f"Grup {message.chat.title} ditambahkan ke whitelist.")
         return
 
-    # Menambahkan grup ke blacklist jika perintah "blacklist" atau "bl" diberikan oleh OWNER
     if ("blacklist" in text or "bl" in text) and message.from_user.id in OWNER_IDS:
         if group_id in blacklisted_groups:
             await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di blacklist.</blockquote>")
         else:
             blacklisted_groups.add(group_id)
             if group_id in whitelisted_groups:
-                whitelisted_groups.remove(group_id)  # Hapus dari whitelist jika ada
+                whitelisted_groups.remove(group_id)
             await message.reply(f"<blockquote>Grup {message.chat.title} berhasil diblacklist. Bot tidak akan merespons di grup ini.</blockquote>")
             logger.get_logger(__name__).info(f"Grup {message.chat.title} diblacklist.")
         return
 
     if "remove" in text and message.from_user.id in OWNER_IDS:
         try:
-            # Ekstraksi ID grup dari teks
             group_id_to_remove = int(text.split("remove")[-1].strip())
 
             if group_id_to_remove in whitelisted_groups:
@@ -215,7 +207,6 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
-            # Jalankan bot secara async setelah update
             await asyncio.create_subprocess_shell("bash start")
 
         except Exception as e:
@@ -228,13 +219,10 @@ async def handle_message(client, message):
         return
 
     try:
-        # Kirim aksi mengetik saat memproses permintaan
         await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
         
-        # Panggil API untuk mendapatkan respon dari chatbot
         result = my_api.ChatBot(message)
 
-        # Potong respon jika terlalu panjang
         if len(result) > MAX_RESPONSE_LENGTH:
             result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
 
