@@ -128,7 +128,7 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
-            subprocess.run(["start", "1"], shell=True)
+            subprocess.run(["start"], shell=True)
 
         except Exception as e:
             await message.reply(f"Terjadi kesalahan saat memperbarui: {e} ⚠️")
