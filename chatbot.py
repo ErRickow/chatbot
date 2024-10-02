@@ -115,28 +115,28 @@ async def handle_message(client, message):
 
     # Cek apakah grup ada di whitelist
     if group_id not in whitelisted_groups and "add" not in text:
-        await message.reply(f"Grup {message.chat.title} belum di-whitelist. Silakan tambahkan dengan perintah /add")
+        await message.reply(f"<blockquote>Grup {message.chat.title} belum di-whitelist. Silakan tambahkan dengan perintah /add</blockquote>")
         return
 
     # Menambahkan grup ke whitelist jika perintah "add" diberikan oleh OWNER
     if "add" in text and message.from_user.id in OWNER_IDS:
         if group_id in whitelisted_groups:
-            await message.reply(f"Grup {message.chat.title} sudah ada di whitelist.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di whitelist.</blockquote>")
         else:
             whitelisted_groups.add(group_id)
-            await message.reply(f"Grup {message.chat.title} berhasil ditambahkan ke whitelist.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil ditambahkan ke whitelist.</blockquote>")
             logger.get_logger(__name__).info(f"Grup {message.chat.title} ditambahkan ke whitelist.")
         return
 
     # Menambahkan grup ke blacklist jika perintah "blacklist" atau "bl" diberikan oleh OWNER
     if ("blacklist" in text or "bl" in text) and message.from_user.id in OWNER_IDS:
         if group_id in blacklisted_groups:
-            await message.reply(f"Grup {message.chat.title} sudah ada di blacklist.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di blacklist.</blockquote>")
         else:
             blacklisted_groups.add(group_id)
             if group_id in whitelisted_groups:
                 whitelisted_groups.remove(group_id)  # Hapus dari whitelist jika ada
-            await message.reply(f"Grup {message.chat.title} berhasil diblacklist. Bot tidak akan merespons di grup ini.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil diblacklist. Bot tidak akan merespons di grup ini.</blockquote>")
             logger.get_logger(__name__).info(f"Grup {message.chat.title} diblacklist.")
         return
 
@@ -144,14 +144,14 @@ async def handle_message(client, message):
     if "remove" in text and message.from_user.id in OWNER_IDS:
         if group_id in whitelisted_groups:
             whitelisted_groups.remove(group_id)
-            await message.reply(f"Grup {message.chat.title} berhasil dihapus dari whitelist.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil dihapus dari whitelist.</blockquote>")
             logger.get_logger(__name__).info(f"Grup {message.chat.title} dihapus dari whitelist.")
         elif group_id in blacklisted_groups:
             blacklisted_groups.remove(group_id)
-            await message.reply(f"Grup {message.chat.title} berhasil dihapus dari blacklist.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil dihapus dari blacklist.</blockquote>")
             logger.get_logger(__name__).info(f"Grup {message.chat.title} dihapus dari blacklist.")
         else:
-            await message.reply(f"Grup {message.chat.title} tidak ditemukan di whitelist atau blacklist.")
+            await message.reply(f"<blockquote>Grup {message.chat.title} tidak ditemukan di whitelist atau blacklist.</blockquote>")
         return
 
     # Aktifkan atau nonaktifkan chatbot
@@ -165,7 +165,7 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>{app.me.mention} sekarang <b>aktif</b>! 🎉</blockquote>")
             logger.get_logger(__name__).info("Chatbot Aktif.")
         except Exception as e:
-            await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️")
+            await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat mengaktifkan chatbot: {e}")
         return
     elif "nonaktif" in text or "cukup" in text:
@@ -178,7 +178,7 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>{app.me.mention} sekarang <b>non-aktif❌</blockquote>")
             logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
         except Exception as e:
-            await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️")
+            await message.reply(f"<blockquote>Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat menonaktifkan chatbot: {e}")
         return
 
@@ -205,10 +205,11 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
-            subprocess.run(["bash", "start"], shell=True)
+            # Jalankan bot secara async setelah update
+            await asyncio.create_subprocess_shell("bash start")
 
         except Exception as e:
-            await message.reply(f"Terjadi kesalahan saat memperbarui: {e} ⚠️")
+            await message.reply(f"<blockquote>Terjadi kesalahan saat memperbarui: {e} ⚠️</blockquote>")
             logger.error(f"Error saat memperbarui bot: {e}")
 
         return
@@ -232,13 +233,12 @@ async def handle_message(client, message):
         if len(result) > PAGE_SIZE:
             await paginate_response(result, message)
         else:
-            # Kirim respon penuh jika tidak terlalu panjang
             await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
     
     except FloodWait as e:
-        await asyncio.sleep(e.x)  # Tunggu waktu yang dibutuhkan sebelum mencoba lagi
+        await asyncio.sleep(e.x)
     except Exception as e:
-        await message.reply(f"Terjadi kesalahan: {str(e)} ⚠️")
+        await message.reply(f"<blockquote>Terjadi kesalahan: {str(e)} ⚠️</blockquote>")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
 
 @app.on_message(filters.command(["tts", "tr"]))
