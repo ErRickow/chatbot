@@ -42,7 +42,7 @@ async def start(client, message):
         {"text": "Developer", "url": "https://t.me/chakszzz"},
         {"text": "visit", "url": "https://t.me/ZeebSupport"},
         {"text": "Other Bot", "url": "https://t.me/erprembot"},
-        {"text": "visit here too", "url": "https://t.me/" 
+        {"text": "visit here too", "url": "https://t.me/"}, 
     ]
     reply_markup = Button().generateInlineButtonGrid(keyboard)
 
