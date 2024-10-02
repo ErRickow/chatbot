@@ -73,7 +73,7 @@ async def handle_clear_message(client, message):
 # Di bagian atas kode, tambahkan variabel untuk menyimpan ID pemilik bot
 # Di bagian atas kode, ganti dengan daftar ID pemilik bot
 OWNER_IDS = [1448273246, 6607703424]
-SETUJU = [6607703424, 940232666, 1325957770]
+SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
 
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
