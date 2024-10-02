@@ -115,7 +115,6 @@ async def handle_message(client, message):
 
     # Cek apakah grup ada di whitelist
     if group_id not in whitelisted_groups and "add" not in text:
-        await message.reply(f"<blockquote>Grup {message.chat.title} belum di-whitelist. Silakan tambahkan dengan perintah /add</blockquote>")
         return
 
     # Menambahkan grup ke whitelist jika perintah "add" diberikan oleh OWNER
@@ -142,16 +141,30 @@ async def handle_message(client, message):
 
     # Menghapus grup dari whitelist atau blacklist jika perintah "remove" diberikan oleh OWNER
     if "remove" in text and message.from_user.id in OWNER_IDS:
-        if group_id in whitelisted_groups:
-            whitelisted_groups.remove(group_id)
-            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil dihapus dari whitelist.</blockquote>")
-            logger.get_logger(__name__).info(f"Grup {message.chat.title} dihapus dari whitelist.")
-        elif group_id in blacklisted_groups:
-            blacklisted_groups.remove(group_id)
-            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil dihapus dari blacklist.</blockquote>")
-            logger.get_logger(__name__).info(f"Grup {message.chat.title} dihapus dari blacklist.")
-        else:
-            await message.reply(f"<blockquote>Grup {message.chat.title} tidak ditemukan di whitelist atau blacklist.</blockquote>")
+        try:
+            # Ekstraksi ID grup dari teks
+            group_id_to_remove = int(text.split("remove")[-1].strip())
+
+            if group_id_to_remove in whitelisted_groups:
+                whitelisted_groups.remove(group_id_to_remove)
+                await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} berhasil dihapus dari whitelist.</blockquote>")
+                logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_remove} dihapus dari whitelist.")
+            elif group_id_to_remove in blacklisted_groups:
+                blacklisted_groups.remove(group_id_to_remove)
+                await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} berhasil dihapus dari blacklist.</blockquote>")
+                logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_remove} dihapus dari blacklist.")
+            else:
+                await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} tidak ditemukan di whitelist atau blacklist.</blockquote>")
+        except ValueError:
+            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
+        return
+
+    # Menampilkan daftar grup yang di-whitelist dan di-blacklist
+    if "list" in text and message.from_user.id in OWNER_IDS:
+        whitelisted_list = "\n".join([str(gid) for gid in whitelisted_groups]) or "Tidak ada grup dalam whitelist."
+        blacklisted_list = "\n".join([str(gid) for gid in blacklisted_groups]) or "Tidak ada grup dalam blacklist."
+        
+        await message.reply(f"<blockquote><b>Grup Whitelist:</b>\n{whitelisted_list}\n\n<b>Grup Blacklist:</b>\n{blacklisted_list}</blockquote>")
         return
 
     # Aktifkan atau nonaktifkan chatbot
