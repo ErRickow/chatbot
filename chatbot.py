@@ -75,11 +75,30 @@ async def handle_clear_message(client, message):
 OWNER_IDS = [1448273246, 6607703424]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
 
+MAX_RESPONSE_LENGTH = 2000  # Max characters allowed in the response
+PAGE_SIZE = 500  # Number of characters per page for pagination
+
+async def paginate_response(response, message):
+    """
+    Paginate the response if it's too long to send in one message.
+    """
+    for i in range(0, len(response), PAGE_SIZE):
+        await message.reply(response[i:i + PAGE_SIZE], quote=True)
+
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
     global chatbot_active
 
     text = message.text.lower()
+    current_time = time.time()
+    last_response_time = user_last_response_time[message.from_user.id]
+
+    if current_time - last_response_time < response_cooldown:
+        return
+
+    user_last_response_time[message.from_user.id] = current_time
+
+    # Handle chatbot activation or deactivation
     if "aktif" in text or "syalala" in text:
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
@@ -107,19 +126,7 @@ async def handle_message(client, message):
             logger.error(f"Error saat menonaktifkan chatbot: {e}")
         return
 
-    if "clear" in text:
-        if message.from_user.id not in OWNER_IDS:
-            await message.reply(f"Lu Siapa")
-            return
-
-        try:
-            clear = my_api.clear_chat_history(message.from_user.id)
-            await message.reply(clear)
-        except Exception as e:
-            await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️")
-            logger.error(f"Error saat menonaktifkan chatbot: {e}")
-            return
-
+    # Handle update command
     if "update" in text:
         if message.from_user.id not in OWNER_IDS:
             await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>", parse_mode='HTML')
@@ -130,6 +137,7 @@ async def handle_message(client, message):
             pros = await message.reply(
                 f"<i><blockquote>🔄 {app.me.mention} Sedang memeriksa pembaruan...</blockquote></i>"
             )
+            
             out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
 
             if "Already up to date." in str(out):
@@ -149,31 +157,34 @@ async def handle_message(client, message):
 
         return
 
-    current_time = time.time()
-    last_response_time = user_last_response_time[message.from_user.id]
-
-    if current_time - last_response_time < response_cooldown:
-        return
-
-    user_last_response_time[message.from_user.id] = current_time
-
+    # Chatbot response logic
     if not chatbot_active:  
         return
 
-    logger.get_logger(__name__).info(f"Menerima pesan dari pengguna dengan ID: [{message.from_user.id}]")
-
-    await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
-
     try:
+        # Send a typing action while processing the request
+        await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+        
+        # Call the API to get the chatbot response
         result = my_api.ChatBot(message)
-        anu = "<blockquote>" + result + "\n©<a href=tg://user?id=1448273246>er</a>" + "</blockquote>"
-        logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
-        await Handler().sendLongPres(message, anu)
+
+        # Truncate the response if it's too long
+        if len(result) > MAX_RESPONSE_LENGTH:
+            result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
+
+        # If the result is longer than the page size, paginate it
+        if len(result) > PAGE_SIZE:
+            await paginate_response(result, message)
+        else:
+            # Send the full response if it's within the limit
+            await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
+    
     except FloodWait as e:
-        await asyncio.sleep(e.x)  # Wait for the required time before retrying
+        await asyncio.sleep(e.x)  # Handle flood waits
     except Exception as e:
-        await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)} ⚠️")
+        await message.reply(f"Terjadi kesalahan: {str(e)} ⚠️")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
+
 
 @app.on_message(filters.command(["tts", "tr"]))
 async def handle_tts(client, message):
