@@ -153,7 +153,7 @@ async def handle_message(client, message):
 
     try:
         result = my_api.ChatBot(message)
-        anu = ("> result")
+        anu = "<blockquote>" + result + "</blockquote>"
         logger.get_logger(__name__).info("Mengirim output besar ke pengguna")
         await Handler().sendLongPres(message, anu)
     except FloodWait as e:
