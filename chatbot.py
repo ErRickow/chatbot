@@ -93,6 +93,11 @@ async def handle_message(client, message):
 
     text = message.text.lower()
     current_time = time.time()
+
+    # Inisialisasi user_last_response_time jika user belum ada di dalamnya
+    if message.from_user.id not in user_last_response_time:
+        user_last_response_time[message.from_user.id] = 0
+
     last_response_time = user_last_response_time[message.from_user.id]
 
     # Cek cooldown untuk pesan dari pengguna
@@ -109,24 +114,30 @@ async def handle_message(client, message):
         return
 
     # Cek apakah grup ada di whitelist
-    if group_id not in whitelisted_groups:
+    if group_id not in whitelisted_groups and "add" not in text:
         await message.reply(f"Grup {message.chat.title} belum di-whitelist. Silakan tambahkan dengan perintah /add")
         return
 
     # Menambahkan grup ke whitelist jika perintah "add" diberikan oleh OWNER
     if "add" in text and message.from_user.id in OWNER_IDS:
-        whitelisted_groups.add(group_id)
-        await message.reply(f"Grup {message.chat.title} berhasil ditambahkan ke whitelist.")
-        logger.get_logger(__name__).info(f"Grup {message.chat.title} ditambahkan ke whitelist.")
+        if group_id in whitelisted_groups:
+            await message.reply(f"Grup {message.chat.title} sudah ada di whitelist.")
+        else:
+            whitelisted_groups.add(group_id)
+            await message.reply(f"Grup {message.chat.title} berhasil ditambahkan ke whitelist.")
+            logger.get_logger(__name__).info(f"Grup {message.chat.title} ditambahkan ke whitelist.")
         return
 
     # Menambahkan grup ke blacklist jika perintah "blacklist" atau "bl" diberikan oleh OWNER
     if ("blacklist" in text or "bl" in text) and message.from_user.id in OWNER_IDS:
-        blacklisted_groups.add(group_id)
-        if group_id in whitelisted_groups:
-            whitelisted_groups.remove(group_id)
-        await message.reply(f"Grup {message.chat.title} berhasil diblacklist. Bot tidak akan merespons di grup ini.")
-        logger.get_logger(__name__).info(f"Grup {message.chat.title} diblacklist.")
+        if group_id in blacklisted_groups:
+            await message.reply(f"Grup {message.chat.title} sudah ada di blacklist.")
+        else:
+            blacklisted_groups.add(group_id)
+            if group_id in whitelisted_groups:
+                whitelisted_groups.remove(group_id)  # Hapus dari whitelist jika ada
+            await message.reply(f"Grup {message.chat.title} berhasil diblacklist. Bot tidak akan merespons di grup ini.")
+            logger.get_logger(__name__).info(f"Grup {message.chat.title} diblacklist.")
         return
 
     # Menghapus grup dari whitelist atau blacklist jika perintah "remove" diberikan oleh OWNER
