@@ -124,7 +124,7 @@ async def handle_message(client, message):
             logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
         return
 
-    if ("blacklist" in text or "bl" in text) and message.from_user.id in OWNER_IDS:
+    if ("blacklist" in text or "block" in text) and message.from_user.id in OWNER_IDS:
         if group_id in blacklisted_groups:
             await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di blacklist.</blockquote>")
         else:
