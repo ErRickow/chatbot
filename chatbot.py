@@ -78,9 +78,18 @@ blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
 
+import time
+import asyncio
+import subprocess
+from pyrogram import filters
+from pyrogram.enums import ChatAction
+
+# Dictionary untuk melacak status aktif/nonaktif chatbot per grup
+chatbot_active_per_group = {}
+
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
-    global chatbot_active
+    global chatbot_active_per_group
 
     text = message.text.lower()
     current_time = time.time()
@@ -155,26 +164,51 @@ async def handle_message(client, message):
             return
 
         try:
-            chatbot_active = True
-            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>aktif</b>! 🎉</blockquote>")
-            logger.get_logger(__name__).info("Chatbot Aktif.")
+            chatbot_active_per_group[group_id] = True  # Aktifkan hanya untuk grup ini
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>aktif</b> di grup {message.chat.title} 🎉</blockquote>")
+            logger.get_logger(__name__).info(f"Chatbot aktif di grup {message.chat.title}.")
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat mengaktifkan chatbot: {e}")
         return
+
     elif "diam" in text or "cukup" in text:
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
             return
 
         try:
-            chatbot_active = False
-            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>non-aktif❌</blockquote>")
-            logger.get_logger(__name__).info("Chatbot dinonaktifkan.")
+            chatbot_active_per_group[group_id] = False  # Nonaktifkan hanya untuk grup ini
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>non-aktif❌</blockquote> di grup {message.chat.title}")
+            logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup {message.chat.title}.")
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat menonaktifkan chatbot: {e}")
         return
+
+    # Jika chatbot non-aktif untuk grup ini, tidak akan merespon
+    if not chatbot_active_per_group.get(group_id, False):
+        return
+
+    # Jika bot direply oleh client, bot tidak merespons
+    if message.reply_to_message and message.reply_to_message.from_user.id == app.me.id:
+        return
+
+    try:
+        await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
+        
+        result = my_api.ChatBot(message)
+
+        if len(result) > MAX_RESPONSE_LENGTH:
+            result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
+
+        await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
+    
+    except Exception as e:
+        await message.reply(f"<blockquote>Terjadi kesalahan: {str(e)} ⚠️</blockquote>")
+        logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
+
+    return
 
     # Update bot
     if "update" in text:
@@ -199,35 +233,14 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
+            # Perintah untuk restart otomatis setelah update
             await asyncio.create_subprocess_shell("bash start")
-
+        
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat memperbarui: {e} ⚠️</blockquote>")
             logger.error(f"Error saat memperbarui bot: {e}")
 
         return
-
-    # Jika chatbot non-aktif, tidak akan merespon
-    if not chatbot_active:
-        return
-
-    # Jika bot direply oleh client, bot tidak merespons
-    if message.reply_to_message and message.reply_to_message.from_user.id == app.me.id:
-        return
-
-    try:
-        await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
-        
-        result = my_api.ChatBot(message)
-
-        if len(result) > MAX_RESPONSE_LENGTH:
-            result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
-
-        await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
-    
-    except Exception as e:
-        await message.reply(f"<blockquote>Terjadi kesalahan: {str(e)} ⚠️</blockquote>")
-        logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
 
 @app.on_message(filters.command(["tts", "tr"]))
 async def handle_tts(client, message):
