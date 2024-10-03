@@ -76,18 +76,9 @@ SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
 whitelisted_groups = set()
 blacklisted_groups = set()
 
-MAX_RESPONSE_LENGTH = 2000
-PAGE_SIZE = 1000
+MAX_RESPONSE_LENGTH = 5000
 
-async def paginate_response(response, message):
-    """
-    Paginate the response if it's too long to send in one message.
-    """
-    for i in range(0, len(response), PAGE_SIZE):
-        await message.reply(response[i:i + PAGE_SIZE], quote=True)
-        await asyncio.sleep(0.1) 
-
-@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group & ~filters.reply)
+@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
     global chatbot_active
 
@@ -216,7 +207,12 @@ async def handle_message(client, message):
 
         return
 
+    # Jika chatbot non-aktif, tidak akan merespon
     if not chatbot_active:
+        return
+
+    # Jika bot direply oleh client, bot tidak merespons
+    if message.reply_to_message and message.reply_to_message.from_user.id == app.me.id:
         return
 
     try:
@@ -224,13 +220,10 @@ async def handle_message(client, message):
         
         result = my_api.ChatBot(message)
 
-#        if len(result) > MAX_RESPONSE_LENGTH:
- #           result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
+        if len(result) > MAX_RESPONSE_LENGTH:
+            result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
 
-        if len(result) > PAGE_SIZE:
-            await paginate_response(result, message)
-        else:
-            await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
+        await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
     
     except Exception as e:
         await message.reply(f"<blockquote>Terjadi kesalahan: {str(e)} ⚠️</blockquote>")
