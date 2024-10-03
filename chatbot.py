@@ -227,7 +227,6 @@ async def handle_message(client, message):
                 f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
             )
 
-            # Perintah untuk restart otomatis setelah update
             await asyncio.create_subprocess_shell("bash start")
         
         except Exception as e:
