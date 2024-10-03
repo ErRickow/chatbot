@@ -164,11 +164,19 @@ async def handle_message(client, message):
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
             return
-
+    
         try:
-            chatbot_active_per_group[group_id] = True  # Aktifkan hanya untuk grup ini
-            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>🎉 aktif</b> di grup {message.chat.title}</blockquote>")
-            logger.get_logger(__name__).info(f"Chatbot aktif di grup {message.chat.title}.")
+            # Coba ambil ID grup dari input manual
+            try:
+                group_id_to_activate = int(text.split("aktif")[-1].strip())
+            except ValueError:
+                # Jika tidak ada input manual, gunakan ID grup saat ini
+                group_id_to_activate = group_id
+    
+            # Aktifkan chatbot untuk grup yang dimasukkan secara manual atau grup saat ini
+            chatbot_active_per_group[group_id_to_activate] = True
+            await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
+            logger.get_logger(__name__).info(f"Chatbot aktif di grup dengan ID {group_id_to_activate}.")
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat mengaktifkan chatbot: {e}")
