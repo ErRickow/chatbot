@@ -29,7 +29,7 @@ app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot
 
 chatbot_active = False  
 user_last_response_time = defaultdict(lambda: 0)
-response_cooldown = 2
+response_cooldown = 0.5
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
@@ -77,7 +77,7 @@ whitelisted_groups = set()
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 2000
-PAGE_SIZE = 500  
+PAGE_SIZE = 1000
 
 async def paginate_response(response, message):
     """
@@ -85,6 +85,7 @@ async def paginate_response(response, message):
     """
     for i in range(0, len(response), PAGE_SIZE):
         await message.reply(response[i:i + PAGE_SIZE], quote=True)
+        await asyncio.sleep(0.1) 
 
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group & ~filters.reply)
 async def handle_message(client, message):
@@ -223,8 +224,8 @@ async def handle_message(client, message):
         
         result = my_api.ChatBot(message)
 
-        if len(result) > MAX_RESPONSE_LENGTH:
-            result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
+#        if len(result) > MAX_RESPONSE_LENGTH:
+ #           result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
 
         if len(result) > PAGE_SIZE:
             await paginate_response(result, message)
