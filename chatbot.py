@@ -159,7 +159,7 @@ async def handle_message(client, message):
 
         try:
             chatbot_active_per_group[group_id] = True  # Aktifkan hanya untuk grup ini
-            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>aktif</b> di grup {message.chat.title} 🎉</blockquote>")
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>🎉 aktif</b> di grup {message.chat.title}</blockquote>")
             logger.get_logger(__name__).info(f"Chatbot aktif di grup {message.chat.title}.")
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
@@ -173,7 +173,7 @@ async def handle_message(client, message):
 
         try:
             chatbot_active_per_group[group_id] = False  # Nonaktifkan hanya untuk grup ini
-            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>non-aktif❌</blockquote> di grup {message.chat.title}")
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>❌ non-aktif di grup {message.chat.title}</blockquote>")
             logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup {message.chat.title}.")
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️</blockquote>")
