@@ -78,7 +78,7 @@ blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
 
-@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
+@app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group & ~filters.reply)
 async def handle_message(client, message):
     global chatbot_active
 
