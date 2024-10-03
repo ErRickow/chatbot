@@ -107,13 +107,21 @@ async def handle_message(client, message):
     if group_id not in whitelisted_groups and "add" not in text:
         return
 
+    # Bagian 'add' yang telah diperbarui dengan input ID manual
     if "add" in text and message.from_user.id in OWNER_IDS:
-        if group_id in whitelisted_groups:
-            await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di whitelist.</blockquote>")
+        try:
+            # Coba ambil ID grup dari input manual
+            group_id_to_add = int(text.split("add")[-1].strip())
+        except ValueError:
+            # Jika tidak ada input manual, gunakan ID grup saat ini
+            group_id_to_add = group_id
+
+        if group_id_to_add in whitelisted_groups:
+            await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
         else:
-            whitelisted_groups.add(group_id)
-            await message.reply(f"<blockquote>Grup {message.chat.title} berhasil ditambahkan ke whitelist.</blockquote>")
-            logger.get_logger(__name__).info(f"Grup {message.chat.title} ditambahkan ke whitelist.")
+            whitelisted_groups.add(group_id_to_add)
+            await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
+            logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
         return
 
     if ("blacklist" in text or "bl" in text) and message.from_user.id in OWNER_IDS:
@@ -184,9 +192,10 @@ async def handle_message(client, message):
     if not chatbot_active_per_group.get(group_id, False):
         return
 
-    # Jika bot direply oleh client, bot tidak merespons
-    if message.reply_to_message and message.reply_to_message.from_user.id == app.me.id:
-        return
+    # Jika pengguna mereply pengguna lain, bot tidak merespons, tetapi jika pengguna mereply bot, bot merespons
+    if message.reply_to_message:
+        if message.reply_to_message.from_user.id != app.me.id:
+            return  # Pengguna mereply pengguna lain, jadi bot tidak merespons
 
     try:
         await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
@@ -204,36 +213,36 @@ async def handle_message(client, message):
 
     return
 
-    # Update bot
-    if "update" in text:
-        if message.from_user.id not in OWNER_IDS:
-            await message.reply(f"<blockquote>Anda tidak memiliki izin untuk melakukan pembaruan 🗿.</blockquote>")
-            return
-
-        logger.get_logger(__name__).info("Memulai proses update.")
+    # Bagian khodam yang diminta
+    if "khodam" in text:
         try:
-            pros = await message.reply(
-                f"<i><blockquote>🔄 {app.me.mention} Sedang memeriksa pembaruan...</blockquote></i>"
-            )
-            
-            out = subprocess.check_output(["git", "pull"]).decode("UTF-8")
+            msg = await message.reply("**Sedang memproses....**")
 
-            if "Already up to date." in str(out):
-                return await pros.edit(
-                    f"<blockquote>✅ {app.me.mention} sudah terbaru.</blockquote>"
-                )
+            user = await Extract().getId(message)
+            if not user:
+                return await msg.edit("**Harap berikan username atau reply ke pengguna untuk dicek khodam nya.**")
 
-            await pros.edit(
-                f"<blockquote>🔄 Pembaruan berhasil! Bot telah diperbarui. 🚀</blockquote>"
-            )
+            get_name = await client.get_users(user)
+            full_name = Extract().getMention(get_name)
+        
+        except Exception:
+            full_name = Handler().getArg(message)
+        
+        logger.get_logger(__name__).info(f"Permintaan mengecek khodam: {full_name}")
 
-            await asyncio.create_subprocess_shell("bash start")
+        try:
+            result = my_api.KhodamCheck(full_name)
+            await Handler().sendLongPres(message, result)
+            await msg.delete()
+            logger.get_logger(__name__).info(f"Berhasil mendapatkan info khodam: {full_name}")
+        
+        except FloodWait as e:
+            await asyncio.sleep(e.x)  # Wait for the required time before retrying
         
         except Exception as e:
-            await message.reply(f"<blockquote>Terjadi kesalahan saat memperbarui: {e} ⚠️</blockquote>")
-            logger.error(f"Error saat memperbarui bot: {e}")
-
-        return
+            await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)}")
+            await msg.delete()
+            logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
 
 @app.on_message(filters.command(["tts", "tr"]))
 async def handle_tts(client, message):
