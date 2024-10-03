@@ -71,7 +71,7 @@ async def handle_clear_message(client, message):
     await message.reply(clear)
 
 OWNER_IDS = [1448273246, 6607703424]
-SETUJU = [6607703424, 940232666, 1325957770, 1448273246]
+SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
 whitelisted_groups = set()
 blacklisted_groups = set()
