@@ -78,12 +78,6 @@ blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
 
-import time
-import asyncio
-import subprocess
-from pyrogram import filters
-from pyrogram.enums import ChatAction
-
 # Dictionary untuk melacak status aktif/nonaktif chatbot per grup
 chatbot_active_per_group = {}
 
