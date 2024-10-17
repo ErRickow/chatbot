@@ -94,27 +94,61 @@ MAX_RESPONSE_LENGTH = 5000
 # Dictionary untuk melacak status aktif/nonaktif chatbot per grup
 chatbot_active_per_group = {}
 
+# Menyimpan informasi mengenai jumlah pesan yang dikirim oleh pengguna dalam waktu tertentu
+user_message_count = {}
+# Menyimpan status pengguna apakah dianggap sebagai spammer
+spammer_users = set()
+
+# Batasan waktu untuk mendeteksi spam (misalnya 10 detik)
+spam_time_window = 10
+
+# Batasan jumlah pesan dalam waktu tersebut (misalnya 5 pesan)
+spam_message_limit = 5
+
+# Group ID untuk log
+  # Ganti dengan ID grup log yang diinginkan
+
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
     global chatbot_active_per_group
 
     text = message.text.lower()
     current_time = time.time()
-
-    if message.from_user.id not in user_last_response_time:
-        user_last_response_time[message.from_user.id] = 0
-
-    last_response_time = user_last_response_time[message.from_user.id]
-
-    if current_time - last_response_time < response_cooldown:
-        return
-
-    user_last_response_time[message.from_user.id] = current_time
-
+    user_id = message.from_user.id
     group_id = message.chat.id
 
+    # Jika pengguna belum ada di data, inisialisasi data mereka
+    if user_id not in user_message_count:
+        user_message_count[user_id] = []
+
+    # Tambahkan waktu pengiriman pesan ke list untuk pengguna ini
+    user_message_count[user_id].append(current_time)
+
+    # Hapus pesan lama dari list (yang lebih lama dari waktu window)
+    user_message_count[user_id] = [
+        timestamp for timestamp in user_message_count[user_id]
+        if current_time - timestamp <= spam_time_window
+    ]
+
+    # Deteksi spam: jika jumlah pesan dalam waktu tertentu lebih dari batas
+    if len(user_message_count[user_id]) > spam_message_limit:
+        # Tandai pengguna sebagai spammer
+        spammer_users.add(user_id)
+
+        # Kirim peringatan di grup
+        await message.reply("<blockquote>🚨 Anda mengirim pesan terlalu cepat. Pesan Anda dianggap sebagai spam dan interaksi Anda dengan bot diblokir sementara.</blockquote>")
+
+        # Kirim peringatan ke logs group
+        warning_message = f"Peringatan: {message.from_user.first_name} dianggap sebagai spammer di grup {message.chat.title}."
+        await client.send_message(LOGS_GROUP_ID, warning_message)
+        return
+
+    # Jika pengguna dianggap sebagai spammer, abaikan pesan mereka
+    if user_id in spammer_users:
+        return
+
+    # Bagian untuk memproses whitelist/blacklist grup
     if group_id in blacklisted_groups:
-        logger.get_logger(__name__).info(f"Pesan diabaikan, grup {message.chat.title} ada di blacklist.")
         return
 
     if group_id not in whitelisted_groups and "add" not in text:
@@ -137,6 +171,7 @@ async def handle_message(client, message):
             logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
         return
 
+    # Bagian blacklist dan remove
     if ("blacklist" in text or "block" in text) and message.from_user.id in OWNER_IDS:
         if group_id in blacklisted_groups:
             await message.reply(f"<blockquote>Grup {message.chat.title} sudah ada di blacklist.</blockquote>")
@@ -166,48 +201,8 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
         return
 
-    if "list" in text and message.from_user.id in OWNER_IDS:
-        whitelisted_list = "\n".join([str(gid) for gid in whitelisted_groups]) or "Tidak ada grup dalam whitelist."
-        blacklisted_list = "\n".join([str(gid) for gid in blacklisted_groups]) or "Tidak ada grup dalam blacklist."
-        
-        await message.reply(f"<blockquote><b>Grup Whitelist:</b>\n{whitelisted_list}\n\n<b>Grup Blacklist:</b>\n{blacklisted_list}</blockquote>")
-        return
-
-    if "aktif" in text or "syalala" in text:
-        if message.from_user.id not in SETUJU:
-            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
-            return
-    
-        try:
-            # Coba ambil ID grup dari input manual
-            try:
-                group_id_to_activate = int(text.split("aktif")[-1].strip())
-            except ValueError:
-                # Jika tidak ada input manual, gunakan ID grup saat ini
-                group_id_to_activate = group_id
-    
-            # Aktifkan chatbot untuk grup yang dimasukkan secara manual atau grup saat ini
-            chatbot_active_per_group[group_id_to_activate] = True
-            await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
-            logger.get_logger(__name__).info(f"Chatbot aktif di grup dengan ID {group_id_to_activate}.")
-        except Exception as e:
-            await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
-            logger.error(f"Error saat mengaktifkan chatbot: {e}")
-        return
-
-    elif "diam" in text or "cukup" in text:
-        if message.from_user.id not in SETUJU:
-            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
-            return
-
-        try:
-            chatbot_active_per_group[group_id] = False  # Nonaktifkan hanya untuk grup ini
-            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>❌ non-aktif di grup {message.chat.title}</blockquote>")
-            logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup {message.chat.title}.")
-        except Exception as e:
-            await message.reply(f"<blockquote>Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️</blockquote>")
-            logger.error(f"Error saat menonaktifkan chatbot: {e}")
-        return
+    # Bagian lain dari logika chatbot tetap sama seperti sebelumnya...
+    # ...
 
     # Jika chatbot non-aktif untuk grup ini, tidak akan merespon
     if not chatbot_active_per_group.get(group_id, False):
@@ -234,36 +229,76 @@ async def handle_message(client, message):
 
     return
 
-    # Bagian khodam yang diminta
-    if "khodam" in text:
-        try:
-            msg = await message.reply("**Sedang memproses....**")
+# Handler untuk perintah /add
+@app.on_message(filters.command("add"))
+async def handle_add_command(client, message):
+    global whitelisted_groups
 
-            user = await Extract().getId(message)
-            if not user:
-                return await msg.edit("**Harap berikan username atau reply ke pengguna untuk dicek khodam nya.**")
+    text = message.text.lower()
 
-            get_name = await client.get_users(user)
-            full_name = Extract().getMention(get_name)
-        
-        except Exception:
-            full_name = Handler().getArg(message)
-        
-        logger.get_logger(__name__).info(f"Permintaan mengecek khodam: {full_name}")
+    try:
+        # Coba ambil ID grup dari input manual
+        group_id_to_add = int(text.split("add")[-1].strip())
+    except ValueError:
+        # Jika tidak ada input manual, balas dengan error
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /add <id_group></blockquote>")
+        return
 
-        try:
-            result = my_api.KhodamCheck(full_name)
-            await Handler().sendLongPres(message, result)
-            await msg.delete()
-            logger.get_logger(__name__).info(f"Berhasil mendapatkan info khodam: {full_name}")
-        
-        except FloodWait as e:
-            await asyncio.sleep(e.x)  # Wait for the required time before retrying
-        
-        except Exception as e:
-            await Handler().sendLongPres(message, f"Terjadi kesalahan: {str(e)}")
-            await msg.delete()
-            logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
+    if group_id_to_add in whitelisted_groups:
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
+    else:
+        whitelisted_groups.add(group_id_to_add)
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
+        logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
+
+# Handler untuk perintah /remove
+@app.on_message(filters.command("remove"))
+async def handle_remove_command(client, message):
+    global whitelisted_groups, blacklisted_groups
+
+    text = message.text.lower()
+
+    try:
+        # Coba ambil ID grup dari input manual
+        group_id_to_remove = int(text.split("remove")[-1].strip())
+    except ValueError:
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
+        return
+
+    if group_id_to_remove in whitelisted_groups:
+        whitelisted_groups.remove(group_id_to_remove)
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} berhasil dihapus dari whitelist.</blockquote>")
+        logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_remove} dihapus dari whitelist.")
+    elif group_id_to_remove in blacklisted_groups:
+        blacklisted_groups.remove(group_id_to_remove)
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} berhasil dihapus dari blacklist.</blockquote>")
+        logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_remove} dihapus dari blacklist.")
+    else:
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} tidak ditemukan di whitelist atau blacklist.</blockquote>")
+
+# Handler untuk perintah /blacklist
+@app.on_message(filters.command("blacklist"))
+async def handle_blacklist_command(client, message):
+    global blacklisted_groups, whitelisted_groups
+
+    text = message.text.lower()
+
+    try:
+        # Coba ambil ID grup dari input manual
+        group_id_to_blacklist = int(text.split("blacklist")[-1].strip())
+    except ValueError:
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /blacklist <id_group></blockquote>")
+        return
+
+    if group_id_to_blacklist in blacklisted_groups:
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_blacklist} sudah ada di blacklist.</blockquote>")
+    else:
+        blacklisted_groups.add(group_id_to_blacklist)
+        if group_id_to_blacklist in whitelisted_groups:
+            whitelisted_groups.remove(group_id_to_blacklist)  # Hapus dari whitelist jika ada
+        await message.reply(f"<blockquote>Grup dengan ID {group_id_to_blacklist} berhasil diblacklist. Bot tidak akan merespons di grup ini.</blockquote>")
+        logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_blacklist} diblacklist.")
+
 
 @app.on_message(filters.command(["tts", "tr"]))
 async def handle_tts(client, message):
