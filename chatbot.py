@@ -59,7 +59,7 @@ LOGS_GROUP_ID = -1002423575637  # Ganti dengan ID grup logs
 
 REQUIRED_CHANNELS = [
     {"name": "ZeebSupport", "link": "https://t.me/ZeebSupport"},
-    {"name": "ErSupport", "link": "https://t.me/Er_support_group"},
+    {"name": "Er_Support_Group", "link": "https://t.me/Er_support_group"},
 ]
 
 @app.on_message(filters.command("start"))
