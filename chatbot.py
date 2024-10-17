@@ -9,10 +9,31 @@ from mytools import Api, BinaryEncryptor, Button, Extract, Handler, ImageGen, Lo
 from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
 from pyrogram.errors import FloodWait
+from pyrogram.errors import UserNotParticipant
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
 if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
     sys.exit(1) 
+
+OWNER_IDS = [1448273246, 6607703424]
+SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
+
+whitelisted_groups = set()
+blacklisted_groups = set()
+
+MAX_RESPONSE_LENGTH = 5000
+
+# Dictionary untuk melacak status aktif/nonaktif chatbot per grup
+chatbot_active_per_group = {}
+
+user_message_count = {}
+
+spammer_users = set()
+
+spam_time_window = 10
+
+spam_message_limit = 5
 
 load_dotenv(sys.argv[1])
 
@@ -34,27 +55,67 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-
 LOGS_GROUP_ID = -1002423575637  # Ganti dengan ID grup logs
+
+REQUIRED_CHANNELS = [
+    {"name": "ZeebSupport", "link": "https://t.me/ZeebSupport"},
+    {"name": "ErSupport", "link": "https://t.me/Er_support_group"},
+]
 
 @app.on_message(filters.command("start"))
 async def start(client, message):
     bot_username = (await client.get_me()).username
     user = message.from_user
+    user_id = user.id
 
+    if user_id not in OWNER_IDS:
+        for channel in REQUIRED_CHANNELS:
+            try:
+                member = await client.get_chat_member(channel["name"], user_id)
+
+                if member.status not in ["member", "administrator", "creator"]:
+                    await message.reply_text(
+                        f"<b>Hai {user.mention}!</b>\n"
+                        f"Untuk menggunakan bot ini, silakan join ke semua channel berikut:\n"
+                        + "\n".join([f"- [{ch['name']}]({ch['link']})" for ch in REQUIRED_CHANNELS]),
+                        reply_markup=InlineKeyboardMarkup([
+                            [InlineKeyboardButton(f"Join {channel['name']}", url=channel["link"])]
+                        ]),
+                        disable_web_page_preview=True
+                    )
+                    return
+            except UserNotParticipant:
+                # Pengguna belum join channel yang diminta
+                await message.reply_text(
+                    f"<b>Hai {user.mention}!</b>\n"
+                    f"Untuk menggunakan bot ini, silakan join ke semua channel berikut:\n"
+                    + "\n".join([f"- [{ch['name']}]({ch['link']})" for ch in REQUIRED_CHANNELS]),
+                    reply_markup=InlineKeyboardMarkup([
+                        [InlineKeyboardButton(f"Join {channel['name']}", url=channel["link"])]
+                    ]),
+                    disable_web_page_preview=True
+                )
+                return
+            except Exception as e:
+                # Menangani error lain
+                logger.get_logger(__name__).error(f"Error: {e}")
+                await message.reply_text("Terjadi kesalahan saat memverifikasi keanggotaan channel.")
+                return
+
+    # Jika pengguna adalah pemilik bot atau sudah bergabung di semua channel, lanjutkan dengan pesan selamat datang
     keyboard = [
-        [InlineKeyboardButton("Developer", url="https://t.me/chakszzz")],
-        [InlineKeyboardButton("Join", url="https://t.me/ZeebSupport")],
-        [InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128")],
-        [InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
+        [InlineKeyboardButton("Developer", url="https://t.me/chakszzz"),
+         InlineKeyboardButton("Support", url="https://t.me/Er_Support_Group")],
+        [InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128"),
+         InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await message.reply_text(
-        f"<b>👋 Hai {user.mention}!</b>\nKenalin nih, gue bot pintar berbasis Python dari mytoolsID. "
-        "Gue siap bantu jawab semua pertanyaan lo.\n\nLu bisa make bot-nya di grup lo ya. "
-        "Masih project Balu.\n\nbtw <b>KALO MO MAKE BOTNYA JANGAN SPAM YA MEK. KALO SPAM GW LAPORIN MAKLO DAH!</b>",
+        f"<b>👋 Halo {user.mention}!</b>\n"
+        "Kenalin, gue adalah asisten virtual cerdas yang selalu siap membantu lo! Dari pertanyaan simpel sampai yang rumit, gue punya jawabannya. "
+        "Gue udah diprogram untuk ngasih respon yang cepat dan akurat.\n\n"
+        "Ayo coba ajak gue ke grup lo, biar obrolan jadi lebih seru dan informatif! Tapi inget, <b>hindari spam ya! Kalau spam, gue nggak segan-segan laporin ke admin!</b>",
         reply_markup=reply_markup
     )
 
@@ -83,30 +144,6 @@ async def handle_clear_message(client, message):
     clear = my_api.clear_chat_history(message.from_user.id)
     await message.reply(clear)
 
-OWNER_IDS = [1448273246, 6607703424]
-SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
-
-whitelisted_groups = set()
-blacklisted_groups = set()
-
-MAX_RESPONSE_LENGTH = 5000
-
-# Dictionary untuk melacak status aktif/nonaktif chatbot per grup
-chatbot_active_per_group = {}
-
-# Menyimpan informasi mengenai jumlah pesan yang dikirim oleh pengguna dalam waktu tertentu
-user_message_count = {}
-# Menyimpan status pengguna apakah dianggap sebagai spammer
-spammer_users = set()
-
-# Batasan waktu untuk mendeteksi spam (misalnya 10 detik)
-spam_time_window = 10
-
-# Batasan jumlah pesan dalam waktu tersebut (misalnya 5 pesan)
-spam_message_limit = 5
-
-# Group ID untuk log
-  # Ganti dengan ID grup log yang diinginkan
 
 @app.on_message(filters.text & ~filters.bot & ~filters.me & filters.group)
 async def handle_message(client, message):
@@ -229,18 +266,15 @@ async def handle_message(client, message):
 
     return
 
-# Handler untuk perintah /add
-@app.on_message(filters.command("add"))
+@app.on_message(filters.command("white"))
 async def handle_add_command(client, message):
     global whitelisted_groups
 
     text = message.text.lower()
 
     try:
-        # Coba ambil ID grup dari input manual
         group_id_to_add = int(text.split("add")[-1].strip())
     except ValueError:
-        # Jika tidak ada input manual, balas dengan error
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /add <id_group></blockquote>")
         return
 
@@ -251,15 +285,13 @@ async def handle_add_command(client, message):
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
         logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
 
-# Handler untuk perintah /remove
-@app.on_message(filters.command("remove"))
+@app.on_message(filters.command("rem"))
 async def handle_remove_command(client, message):
     global whitelisted_groups, blacklisted_groups
 
     text = message.text.lower()
 
     try:
-        # Coba ambil ID grup dari input manual
         group_id_to_remove = int(text.split("remove")[-1].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
@@ -276,15 +308,13 @@ async def handle_remove_command(client, message):
     else:
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} tidak ditemukan di whitelist atau blacklist.</blockquote>")
 
-# Handler untuk perintah /blacklist
-@app.on_message(filters.command("blacklist"))
+@app.on_message(filters.command("bl"))
 async def handle_blacklist_command(client, message):
     global blacklisted_groups, whitelisted_groups
 
     text = message.text.lower()
 
     try:
-        # Coba ambil ID grup dari input manual
         group_id_to_blacklist = int(text.split("blacklist")[-1].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /blacklist <id_group></blockquote>")
