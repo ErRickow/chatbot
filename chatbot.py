@@ -72,6 +72,10 @@ async def must_join_channel(app: Client, msg: Message):
             try:
                 await app.get_chat_member(channel, msg.from_user.id)
             except UserNotParticipant:
+                await app.send_message(
+                    LOGS_GROUP_ID,
+                    f"User {msg.from_user.mention} belum bergabung ke {channel}."
+                )
                 if channel.isalpha():
                     link = "https://t.me/" + channel
                 else:
@@ -93,7 +97,7 @@ async def must_join_channel(app: Client, msg: Message):
                 except ChatWriteForbidden:
                     pass
     except ChatAdminRequired:
-        print(f"Bot perlu diangkat sebagai admin di grup/channel yang diminta: {MUST_JOIN} !")
+        await app.send_message(LOGS_GROUP_ID, f"Bot perlu diangkat sebagai admin di grup/channel yang diminta: {MUST_JOIN} !")
 
 @app.on_message(filters.command("start"))
 async def start(client, message):
