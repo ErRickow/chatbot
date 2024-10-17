@@ -233,7 +233,7 @@ async def handle_message(client, message):
             else:
                 await message.reply(f"<blockquote>Grup dengan ID {group_id_to_remove} tidak ditemukan di whitelist atau blacklist.</blockquote>")
         except ValueError:
-            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
+            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove [id_group]</blockquote>")
         return
 
     if "aktif" in text or "syalala" in text:
@@ -306,7 +306,7 @@ async def handle_add_command(client, message):
     try:
         group_id_to_add = int(text.split("add")[-1].strip())
     except ValueError:
-        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /add <id_group></blockquote>")
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /add [id_group]</blockquote>")
         return
 
     if group_id_to_add in whitelisted_groups:
@@ -325,7 +325,7 @@ async def handle_remove_command(client, message):
     try:
         group_id_to_remove = int(text.split("remove")[-1].strip())
     except ValueError:
-        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove [id_group]</blockquote>")
         return
 
     if group_id_to_remove in whitelisted_groups:
