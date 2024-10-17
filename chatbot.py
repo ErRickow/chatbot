@@ -412,5 +412,51 @@ async def handle_image(client, message):
         await msg.delete()
         logger.get_logger(__name__).error(f"Error generating image: {e}")
 
+@app.on_message(filters.command("restart"))
+async def restart_bot(client, message):
+    user_id = message.from_user.id
+    
+    if user_id not in OWNER_IDS:
+        await message.reply("🚫 Anda tidak memiliki izin untuk menjalankan perintah ini.")
+        return
+    
+    await message.reply("🔄 Bot sedang di-restart...")
+    
+    # Menjalankan perintah untuk merestart bot
+    subprocess.run(["bash", "st*"])    # Restart bot dengan menjalankan ulang script Python
+
+    # Jika menggunakan Heroku atau platform lain, bisa menggunakan perintah yang sesuai
+    # Contoh:
+    # subprocess.run(["heroku", "restart", "-a", "your-app-name"])  # Restart Heroku Dyno
+
+
+@app.on_message(filters.command("sh"))
+async def run_bash_command(client, message):
+    user_id = message.from_user.id
+    
+    if user_id not in OWNER_IDS:
+        await message.reply("🚫 Anda tidak memiliki izin untuk menjalankan perintah ini.")
+        return
+    
+    command = message.text.split(" ", 1)[-1].strip()
+
+    if not command:
+        await message.reply("❌ Perintah shell tidak boleh kosong.")
+        return
+
+    try:
+        output = subprocess.check_output(command, shell=True, stderr=subprocess.STDOUT, text=True)
+        if len(output) > 4096:
+            with open("output.txt", "w") as f:
+                f.write(output)
+            await message.reply_document("output.txt")
+        else:
+            await message.reply(f"💻 Output:\n<pre>{output}</pre>", parse_mode="html")
+    except subprocess.CalledProcessError as e:
+        await message.reply(f"⚠️ Terjadi kesalahan saat menjalankan perintah:\n<pre>{e.output}</pre>")
+    except Exception as e:
+        await message.reply(f"⚠️ Error: {str(e)}")
+
+
 if __name__ == "__main__":
     app.run()
