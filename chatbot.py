@@ -79,7 +79,7 @@ async def must_join_channel(app: Client, msg: Message):
                     link = chat_info.invite_link
                 try:
                     await msg.reply_photo(
-                        photo="https://mallucampaign.in/images/img_1715658204.jpg",
+                        photo="https://ibb.co.com/nbD5ZNk",
                         caption=f"Untuk menggunakan bot ini, kamu harus bergabung dulu ke channel kami [di sini]({link}). Setelah bergabung, silakan ketik /start kembali.",
                         reply_markup=InlineKeyboardMarkup(
                             [
@@ -104,10 +104,8 @@ async def start(client, message):
     # Jika pengguna adalah pemilik bot atau sudah bergabung di semua channel, lanjutkan dengan pesan selamat datang
     keyboard = [
         [InlineKeyboardButton("Developer", url="https://t.me/chakszzz"),
-         InlineKeyboardButton("Support", url="https://t.me/Er_Support_Group"),
-         InlineKeyboardButton("ZeebSupport", url="https://t.me/ZeebSupport")],
-        [InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128"),
-         InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
+        InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128")],
+         [InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
