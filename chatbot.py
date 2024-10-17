@@ -16,7 +16,7 @@ if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
     sys.exit(1) 
 
-OWNER_IDS = [1448273246, 6607703424]
+OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
 whitelisted_groups = set()
@@ -69,38 +69,37 @@ async def start(client, message):
     user_id = user.id
 
     if user_id not in OWNER_IDS:
+        not_joined_channels = []
+
         for channel in REQUIRED_CHANNELS:
             try:
+                # Memeriksa apakah user adalah anggota channel
                 member = await client.get_chat_member(channel["name"], user_id)
 
+                # Jika bukan anggota atau belum join, tambahkan ke daftar not_joined_channels
                 if member.status not in ["member", "administrator", "creator"]:
-                    await message.reply_text(
-                        f"<b>Hai {user.mention}!</b>\n"
-                        f"Untuk menggunakan bot ini, silakan join ke semua channel berikut:\n"
-                        + "\n".join([f"- [{ch['name']}]({ch['link']})" for ch in REQUIRED_CHANNELS]),
-                        reply_markup=InlineKeyboardMarkup([
-                            [InlineKeyboardButton(f"Join {channel['name']}", url=channel["link"])]
-                        ]),
-                        disable_web_page_preview=True
-                    )
-                    return
-            except UserNotParticipant:
-                # Pengguna belum join channel yang diminta
-                await message.reply_text(
-                    f"<b>Hai {user.mention}!</b>\n"
-                    f"Untuk menggunakan bot ini, silakan join ke semua channel berikut:\n"
-                    + "\n".join([f"- [{ch['name']}]({ch['link']})" for ch in REQUIRED_CHANNELS]),
-                    reply_markup=InlineKeyboardMarkup([
-                        [InlineKeyboardButton(f"Join {channel['name']}", url=channel["link"])]
-                    ]),
-                    disable_web_page_preview=True
-                )
-                return
+                    not_joined_channels.append(channel)
+
             except Exception as e:
-                # Menangani error lain
-                logger.get_logger(__name__).error(f"Error: {e}")
-                await message.reply_text("Terjadi kesalahan saat memverifikasi keanggotaan channel.")
-                return
+                # Tangani error dengan mengirim pesan ke logs group
+                await client.send_message(
+                    LOGS_GROUP_ID,
+                    f"Error dalam pengecekan channel {channel['name']} untuk user {user.mention} dengan ID {user.id}: {e}"
+                )
+                not_joined_channels.append(channel)
+
+        # Jika ada channel yang belum diikuti, kirim pesan untuk meminta user bergabung
+        if not_joined_channels:
+            await message.reply_text(
+                f"<b>Hai {user.mention}!</b>\n"
+                f"Untuk menggunakan bot ini, silakan join ke semua channel berikut:\n"
+                + "\n".join([f"- [{ch['name']}]({ch['link']})" for ch in not_joined_channels]),
+                reply_markup=InlineKeyboardMarkup([
+                    [InlineKeyboardButton(f"Join {ch['name']}", url=ch["link"]) for ch in not_joined_channels]
+                ]),
+                disable_web_page_preview=True
+            )
+            return
 
     # Jika pengguna adalah pemilik bot atau sudah bergabung di semua channel, lanjutkan dengan pesan selamat datang
     keyboard = [
