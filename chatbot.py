@@ -10,7 +10,8 @@ from pyrogram import Client, filters
 from pyrogram.enums import ChatAction
 from pyrogram.errors import FloodWait
 from pyrogram.errors import UserNotParticipant
-from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
+from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChatWriteForbidden
 
 if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
@@ -55,12 +56,44 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
-LOGS_GROUP_ID = -1002423575637  # Ganti dengan ID grup logs
+LOGS_GROUP_ID = -1002423575637  
 
-REQUIRED_CHANNELS = [
-    {"name": "ZeebSupport", "link": "https://t.me/ZeebSupport"},
-    {"name": "Er_Support_Group", "link": "https://t.me/Er_support_group"},
-]
+from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
+from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChatWriteForbidden
+
+MUST_JOIN = ["Er_support_group", "ZeebSupport"]
+
+@app.on_message(filters.incoming & filters.private, group=-1)
+async def must_join_channel(app: Client, msg: Message):
+    if not MUST_JOIN:
+        return
+    try:
+        for channel in MUST_JOIN:
+            try:
+                await app.get_chat_member(channel, msg.from_user.id)
+            except UserNotParticipant:
+                if channel.isalpha():
+                    link = "https://t.me/" + channel
+                else:
+                    chat_info = await app.get_chat(channel)
+                    link = chat_info.invite_link
+                try:
+                    await msg.reply_photo(
+                        photo="https://mallucampaign.in/images/img_1715658204.jpg",
+                        caption=f"Untuk menggunakan bot ini, kamu harus bergabung dulu ke channel kami [di sini]({link}). Setelah bergabung, silakan ketik /start kembali.",
+                        reply_markup=InlineKeyboardMarkup(
+                            [
+                                [
+                                    InlineKeyboardButton("🔗 GABUNG SEKARANG", url=link),
+                                ]
+                            ]
+                        )
+                    )
+                    await msg.stop_propagation()
+                except ChatWriteForbidden:
+                    pass
+    except ChatAdminRequired:
+        print(f"Bot perlu diangkat sebagai admin di grup/channel yang diminta: {MUST_JOIN} !")
 
 @app.on_message(filters.command("start"))
 async def start(client, message):
@@ -68,43 +101,11 @@ async def start(client, message):
     user = message.from_user
     user_id = user.id
 
-    if user_id not in OWNER_IDS:
-        not_joined_channels = []
-
-        for channel in REQUIRED_CHANNELS:
-            try:
-                # Memeriksa apakah user adalah anggota channel
-                member = await client.get_chat_member(channel["name"], user_id)
-
-                # Jika bukan anggota atau belum join, tambahkan ke daftar not_joined_channels
-                if member.status not in ["member", "administrator", "creator"]:
-                    not_joined_channels.append(channel)
-
-            except Exception as e:
-                # Tangani error dengan mengirim pesan ke logs group
-                await client.send_message(
-                    LOGS_GROUP_ID,
-                    f"Error dalam pengecekan channel {channel['name']} untuk user {user.mention} dengan ID {user.id}: {e}"
-                )
-                not_joined_channels.append(channel)
-
-        # Jika ada channel yang belum diikuti, kirim pesan untuk meminta user bergabung
-        if not_joined_channels:
-            await message.reply_text(
-                f"<b>Hai {user.mention}!</b>\n"
-                f"Untuk menggunakan bot ini, silakan join ke semua channel berikut:\n"
-                + "\n".join([f"- [{ch['name']}]({ch['link']})" for ch in not_joined_channels]),
-                reply_markup=InlineKeyboardMarkup([
-                    [InlineKeyboardButton(f"Join {ch['name']}", url=ch["link"]) for ch in not_joined_channels]
-                ]),
-                disable_web_page_preview=True
-            )
-            return
-
     # Jika pengguna adalah pemilik bot atau sudah bergabung di semua channel, lanjutkan dengan pesan selamat datang
     keyboard = [
         [InlineKeyboardButton("Developer", url="https://t.me/chakszzz"),
-         InlineKeyboardButton("Support", url="https://t.me/Er_Support_Group")],
+         InlineKeyboardButton("Support", url="https://t.me/Er_Support_Group"),
+         InlineKeyboardButton("ZeebSupport", url="https://t.me/ZeebSupport")],
         [InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128"),
          InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
     ]
