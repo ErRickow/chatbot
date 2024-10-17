@@ -348,7 +348,7 @@ async def handle_blacklist_command(client, message):
     try:
         group_id_to_blacklist = int(text.split("blacklist")[-1].strip())
     except ValueError:
-        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /blacklist <id_group></blockquote>")
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /blacklist [id_group]</blockquote>")
         return
 
     if group_id_to_blacklist in blacklisted_groups:
@@ -451,7 +451,7 @@ async def run_bash_command(client, message):
                 f.write(output)
             await message.reply_document("output.txt")
         else:
-            await message.reply(f"💻 Output:\n<pre>{output}</pre>", parse_mode="html")
+            await message.reply(f"💻 Output:\n<pre>{output}</pre>")
     except subprocess.CalledProcessError as e:
         await message.reply(f"⚠️ Terjadi kesalahan saat menjalankan perintah:\n<pre>{e.output}</pre>")
     except Exception as e:
