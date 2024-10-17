@@ -34,24 +34,36 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
+from pyrogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+
+LOGS_GROUP_ID = -1002423575637  # Ganti dengan ID grup logs
+
 @app.on_message(filters.command("start"))
 async def start(client, message):
     bot_username = (await client.get_me()).username
-    user_id = message.from_user.id
+    user = message.from_user
 
     keyboard = [
-        {"text": "Developer", "url": "https://t.me/chakszzz"},
-        {"text": "Join", "url": "https://t.me/ZeebSupport"},
-        {"text": "Other Bot", "url": "https://t.me/pamerdong/128"},
-        {"text": "Add to Group", "url": "https://t.me/{bot_username}?startgroup=true"},
+        [InlineKeyboardButton("Developer", url="https://t.me/chakszzz")],
+        [InlineKeyboardButton("Join", url="https://t.me/ZeebSupport")],
+        [InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128")],
+        [InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
     ]
-    reply_markup = Button().generateInlineButtonGrid(keyboard)
+    reply_markup = InlineKeyboardMarkup(keyboard)
 
     await message.reply_text(
-        f"<blockquote><b>👋 Hai {Extract().getMention(message.from_user)}!</b>\nKenalin nih, gue bot pintar berbasis Python dari mytoolsID. Gue siap bantu jawab semua pertanyaan lo.\n\nLu bisa make bot-nya di grup lo ya. Masih project Balu.\n\nbtw <b>KALO MO MAKE BOTNYA JANGAN SPAM YA MEK. KALO SPAM GW LAPORIN MAKLO DAH!</b></blockquote>",
-        reply_markup=reply_markup,
+        f"<b>👋 Hai {user.mention}!</b>\nKenalin nih, gue bot pintar berbasis Python dari mytoolsID. "
+        "Gue siap bantu jawab semua pertanyaan lo.\n\nLu bisa make bot-nya di grup lo ya. "
+        "Masih project Balu.\n\nbtw <b>KALO MO MAKE BOTNYA JANGAN SPAM YA MEK. KALO SPAM GW LAPORIN MAKLO DAH!</b>",
+        reply_markup=reply_markup
     )
-    logger.get_logger(__name__).info("Mengirim pesan selamat datang")
+
+    # Mengirim pesan log ke grup logs
+    await client.send_message(
+        LOGS_GROUP_ID,
+        f"User {user.mention} dengan ID {user.id} baru saja memulai bot.",
+    )
+    logger.get_logger(__name__).info("Mengirim pesan selamat datang ke user")
 
 @app.on_message(filters.command(["bencode", "bdecode"]))
 async def handle_encrypt(client, message):
