@@ -36,13 +36,14 @@ binary = BinaryEncryptor(1945)
 
 @app.on_message(filters.command("start"))
 async def start(client, message):
+    bot_username = (await client.get_me()).username
     user_id = message.from_user.id
 
     keyboard = [
         {"text": "Developer", "url": "https://t.me/chakszzz"},
-        {"text": "visit", "url": "https://t.me/ZeebSupport"},
-        {"text": "Other Bot", "url": "https://t.me/erprembot"},
-        {"text": "visit here too", "url": "https://t.me/"}, 
+        {"text": "Join", "url": "https://t.me/ZeebSupport"},
+        {"text": "Other Bot", "url": "https://t.me/pamerdong/128"},
+        {"text": "Add to Group", "url": "https://t.me/{bot_username}?startgroup=true"},
     ]
     reply_markup = Button().generateInlineButtonGrid(keyboard)
 
