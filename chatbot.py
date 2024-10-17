@@ -179,7 +179,6 @@ async def handle_message(client, message):
         await client.send_message(LOGS_GROUP_ID, warning_message)
         return
 
-    # Jika pengguna dianggap sebagai spammer, abaikan pesan mereka
     if user_id in spammer_users:
         return
 
@@ -237,14 +236,47 @@ async def handle_message(client, message):
             await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove <id_group></blockquote>")
         return
 
-    # Bagian lain dari logika chatbot tetap sama seperti sebelumnya...
-    # ...
+    if "aktif" in text or "syalala" in text:
+        if message.from_user.id not in SETUJU:
+            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
+            return
+    
+        try:
+            # Coba ambil ID grup dari input manual
+            try:
+                group_id_to_activate = int(text.split("aktif")[-1].strip())
+            except ValueError:
+                # Jika tidak ada input manual, gunakan ID grup saat ini
+                group_id_to_activate = group_id
+    
+            # Aktifkan chatbot untuk grup yang dimasukkan secara manual atau grup saat ini
+            chatbot_active_per_group[group_id_to_activate] = True
+            await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
+            logger.get_logger(__name__).info(f"Chatbot aktif di grup dengan ID {group_id_to_activate}.")
+        except Exception as e:
+            await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
+            logger.error(f"Error saat mengaktifkan chatbot: {e}")
+        return
+
+    elif "diam" in text or "cukup" in text:
+        if message.from_user.id not in SETUJU:
+            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
+            return
+
+        try:
+            chatbot_active_per_group[group_id] = False  # Nonaktifkan hanya untuk grup ini
+            await message.reply(f"<blockquote>{app.me.mention} sekarang <b>❌ non-aktif di grup {message.chat.title}</blockquote>")
+            logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup {message.chat.title}.")
+        except Exception as e:
+            await message.reply(f"<blockquote>Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️</blockquote>")
+            logger.error(f"Error saat menonaktifkan chatbot: {e}")
+        return
 
     # Jika chatbot non-aktif untuk grup ini, tidak akan merespon
     if not chatbot_active_per_group.get(group_id, False):
         return
 
-    # Jika pengguna mereply pengguna lain, bot tidak merespons, tetapi jika pengguna mereply bot, bot merespons
+
     if message.reply_to_message:
         if message.reply_to_message.from_user.id != app.me.id:
             return  # Pengguna mereply pengguna lain, jadi bot tidak merespons
