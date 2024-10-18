@@ -332,7 +332,7 @@ async def handle_on_command(client, message):
         except ValueError:
             await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /on [id_group]</blockquote>")
         return
-            group_id_to_activate = message.chat.id
+#            group_id_to_activate = message.chat.id
 
         chatbot_active_per_group[group_id_to_activate] = True
         await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
@@ -362,7 +362,7 @@ async def handle_off_command(client, message):
         except ValueError:
             await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /off [id_group]</blockquote>")
         return
-            group_id_to_deactivate = message.chat.id
+ #           group_id_to_deactivate = message.chat.id
 
         # Menonaktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_deactivate] = False
@@ -398,7 +398,7 @@ async def handle_add_command(client, message):
         whitelisted_groups.add(group_id_to_add)
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
         
-        await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan chatbot \n<b> ╰ Where?:</b> Group id {group_id_to_remove}")
+        await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan chatbot \n<b> ╰ Where?:</b> Group id {group_id_to_add}")
         logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
 
 @app.on_message(filters.command("rem"))
