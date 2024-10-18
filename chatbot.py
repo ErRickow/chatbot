@@ -327,13 +327,13 @@ async def handle_on_command(client, message):
     user = message.from_user
 
     try:
+        # Coba ekstrak ID grup dari perintah
         try:
-            group_id_to_activate = int(text.split("on")[-1].strip())
-        except ValueError:
-  #          await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /on [id_group]</blockquote>")
-        return
-            group_id_to_activate = message.chat.id
+            group_id_to_activate = int(text.split(" ")[-1].strip())  # Ambil ID grup terakhir setelah spasi
+        except (ValueError, IndexError):
+            group_id_to_activate = message.chat.id  # Gunakan ID grup saat ini jika gagal
 
+        # Aktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_activate] = True
         await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
 
@@ -349,6 +349,7 @@ async def handle_on_command(client, message):
         await client.send_message(LOGS_GROUP_ID, f"Bukan gitu caranya mas {user.mention}")
         logger.error(f"Error saat mengaktifkan chatbot: {e}")
 
+
 @app.on_message(filters.command("off"))
 async def handle_off_command(client, message):
     global chatbot_active_per_group
@@ -358,11 +359,9 @@ async def handle_off_command(client, message):
     try:
         # Ekstraksi ID grup dari perintah, jika gagal, gunakan ID grup saat ini
         try:
-            group_id_to_deactivate = int(text.split("off")[-1].strip())
-        except ValueError:
-  #          await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /off [id_group]</blockquote>")
-        return
-            group_id_to_deactivate = message.chat.id
+            group_id_to_deactivate = int(text.split(" ")[-1].strip())  # Ambil ID grup terakhir setelah spasi
+        except (ValueError, IndexError):
+            group_id_to_deactivate = message.chat.id  # Gunakan ID grup saat ini jika gagal
 
         # Menonaktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_deactivate] = False
