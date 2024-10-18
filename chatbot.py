@@ -330,7 +330,7 @@ async def handle_on_command(client, message):
         try:
             group_id_to_activate = int(text.split("on")[-1].strip())
         except ValueError:
-            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /on [id_group]</blockquote>")
+  #          await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /on [id_group]</blockquote>")
         return
             group_id_to_activate = message.chat.id
 
@@ -360,9 +360,9 @@ async def handle_off_command(client, message):
         try:
             group_id_to_deactivate = int(text.split("off")[-1].strip())
         except ValueError:
-            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /off [id_group]</blockquote>")
+  #          await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /off [id_group]</blockquote>")
         return
- #           group_id_to_deactivate = message.chat.id
+            group_id_to_deactivate = message.chat.id
 
         # Menonaktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_deactivate] = False
