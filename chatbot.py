@@ -361,7 +361,7 @@ async def handle_add_command(client, message):
     text = message.text.lower()
 
     try:
-        group_id_to_add = int(text.split("add")[-1].strip())
+        group_id_to_add = int(text.split("white")[-1].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /add [id_group]</blockquote>")
         return
@@ -380,7 +380,7 @@ async def handle_remove_command(client, message):
     text = message.text.lower()
 
     try:
-        group_id_to_remove = int(text.split("remove")[-1].strip())
+        group_id_to_remove = int(text.split("rem")[-1].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /remove [id_group]</blockquote>")
         return
@@ -403,7 +403,7 @@ async def handle_blacklist_command(client, message):
     text = message.text.lower()
 
     try:
-        group_id_to_blacklist = int(text.split("blacklist")[-1].strip())
+        group_id_to_blacklist = int(text.split("bl")[-1].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /blacklist [id_group]</blockquote>")
         return
