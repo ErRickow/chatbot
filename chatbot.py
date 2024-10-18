@@ -241,7 +241,7 @@ async def handle_message(client, message):
 
     if "aktif" in text or "syalala" in text:
         if message.from_user.id not in SETUJU:
-            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
+            await message.reply(f"<blockquote>Gunakan di Bot!</blockquote>")
             return
     
         try:
@@ -263,7 +263,7 @@ async def handle_message(client, message):
 
     elif "diam" in text or "cukup" in text:
         if message.from_user.id not in SETUJU:
-            await message.reply(f"<blockquote>lo siapa 🗿.</blockquote>")
+            await message.reply(f"<blockquote>Gunakan di Bot!</blockquote>")
             return
 
         try:
@@ -275,7 +275,6 @@ async def handle_message(client, message):
             logger.error(f"Error saat menonaktifkan chatbot: {e}")
         return
 
-    # Jika chatbot non-aktif untuk grup ini, tidak akan merespon
     if not chatbot_active_per_group.get(group_id, False):
         return
 
@@ -299,6 +298,32 @@ async def handle_message(client, message):
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
 
     return
+
+@app.on_message(filters.command("on"))
+async def handle_on_command(client, message):
+    global chatbot_active_per_group
+    text = message.text.lower()
+    user = message.from_user
+
+    try:
+        try:
+            group_id_to_activate = int(text.split("on")[-1].strip())
+        except ValueError:
+            group_id_to_activate = message.chat.id
+
+        chatbot_active_per_group[group_id_to_activate] = True
+        await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
+
+        # Mengirim pesan notifikasi ke grup logs
+        await client.send_message(
+            LOGS_GROUP_ID,
+            f"User {user.mention} telah mengaktifkan chatbot untuk grup dengan ID {group_id_to_activate}.",
+        )
+        logger.get_logger(__name__).info(f"Chatbot aktif di grup dengan ID {group_id_to_activate} oleh {user.mention}.")
+    except Exception as e:
+        await message.reply(f"<blockquote>Terjadi kesalahan saat mengaktifkan chatbot: {e} ⚠️</blockquote>")
+        logger.error(f"Error saat mengaktifkan chatbot: {e}")
+
 
 @app.on_message(filters.command("white"))
 async def handle_add_command(client, message):
