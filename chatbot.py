@@ -115,12 +115,14 @@ async def start(client, message):
 
     await message.reply_text(
         f"<b>👋 Halo {user.mention}!</b>\n"
-        "Kenalin, gue adalah asisten virtual cerdas yang selalu siap membantu lo! Dari pertanyaan simpel sampai yang rumit, gue punya jawabannya. "
-        "Gue udah diprogram untuk ngasih respon yang cepat dan akurat.\n\n"
-        "Ayo coba ajak gue ke grup lo, biar obrolan jadi lebih seru dan informatif! Tapi inget, <b>hindari spam ya! Kalau spam, gue nggak segan-segan laporin ke admin!</b>\n\n"
-        "Sebelum bisa dipakai di grup, lo harus pencet /white untuk menambahkan ID grup lo ke bot, misalnya: <code>/white [id_group]</code>.\n"
-        "Lalu, aktifkan bot di grup dengan perintah <code>/on [id_group]</code> biar bot bisa aktif dan membantu lo! "
-        "Lo juga bisa matiin bot kapan aja dengan <code>/off [id_group]</code> kalau butuh istirahat.",
+        "Kenalin, gue adalah asisten virtual cerdas yang siap bantu lo kapan aja! 🤖✨ Dari pertanyaan simpel sampai yang rumit, gue punya jawabannya. "
+        "Gue diprogram buat ngasih respon cepat dan akurat ⚡️.\n\n"
+        "Ayo, coba ajak gue ke grup lo, biar obrolan makin seru dan informatif! 🎉 Tapi inget, <b>hindari spam</b> ya! Kalau spam, gue bakal laporin ke owner! 🚫👮‍♂️\n\n"
+        "<b>Langkah-langkah untuk menggunakan bot di grup:</b>\n"
+        "1️⃣ Tambahkan ID grup lo dengan mengetik: <code>/white [id_group]</code>\n"
+        "2️⃣ Aktifkan bot di grup dengan mengetik: <code>/on [id_group]</code>\n"
+        "3️⃣ Lo bisa matiin bot kapan aja dengan: <code>/off [id_group]</code> kalau butuh istirahat 💤\n\n"
+        "Jangan ragu buat coba sekarang dan rasakan pengalaman baru! 🔥",
         reply_markup=reply_markup
     )
 
@@ -181,14 +183,13 @@ async def handle_message(client, message):
         await message.reply("<blockquote>🚨 Anda mengirim pesan terlalu cepat. Pesan Anda dianggap sebagai spam dan interaksi Anda dengan bot diblokir sementara.</blockquote>")
 
         # Kirim peringatan ke logs group
-        warning_message = f"Peringatan: {message.from_user.first_name} dianggap sebagai spammer di grup {message.chat.title}."
+        warning_message = f"<b>❏ Peringatan:</b> {message.from_user.first_name}\n<b> ├ Why?:</b> dianggap sebagai spammer \n<b> ╰ Where?:</b> Grup {message.chat.title}."
         await client.send_message(LOGS_GROUP_ID, warning_message)
         return
 
     if user_id in spammer_users:
         return
 
-    # Bagian untuk memproses whitelist/blacklist grup
     if group_id in blacklisted_groups:
         return
 
@@ -294,7 +295,7 @@ async def handle_message(client, message):
         await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
     
     except Exception as e:
-        await message.reply(f"<blockquote>Terjadi kesalahan: {str(e)} ⚠️</blockquote>")
+        await client.send_message(LOGS_GROUP_ID, f"<blockquote>Terjadi kesalahan: <pre>{str(e)} ⚠️</pre></blockquote>")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
 
     return
@@ -309,7 +310,9 @@ async def handle_on_command(client, message):
         try:
             group_id_to_activate = int(text.split("on")[-1].strip())
         except ValueError:
-            group_id_to_activate = message.chat.id
+            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /on [id_group]</blockquote>")
+        return
+#            group_id_to_activate = message.chat.id
 
         chatbot_active_per_group[group_id_to_activate] = True
         await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup dengan ID {group_id_to_activate}</blockquote>")
@@ -317,7 +320,7 @@ async def handle_on_command(client, message):
         # Mengirim pesan notifikasi ke grup logs
         await client.send_message(
             LOGS_GROUP_ID,
-            f"User {user.mention} telah mengaktifkan chatbot untuk grup dengan ID {group_id_to_activate}.",
+            f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> mengaktifkan chatbot \n<b> ╰ Where?:</b> grup dengan ID {group_id_to_activate}.",
         )
         logger.get_logger(__name__).info(f"Chatbot aktif di grup dengan ID {group_id_to_activate} oleh {user.mention}.")
     except Exception as e:
@@ -337,7 +340,9 @@ async def handle_off_command(client, message):
         try:
             group_id_to_deactivate = int(text.split("off")[-1].strip())
         except ValueError:
-            group_id_to_deactivate = message.chat.id
+            await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /off [id_group]</blockquote>")
+        return
+ #           group_id_to_deactivate = message.chat.id
 
         # Menonaktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_deactivate] = False
@@ -345,7 +350,7 @@ async def handle_off_command(client, message):
 
         await client.send_message(
             LOGS_GROUP_ID,
-            f"User {user.mention} telah menonaktifkan chatbot untuk grup dengan ID {group_id_to_deactivate}.",
+            f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menonaktifkan chatbot \n<b> ╰ Where?:</b> grup dengan ID {group_id_to_deactivate}.",
         )
         logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup dengan ID {group_id_to_deactivate} oleh {user.mention}.")
     except Exception as e:
@@ -357,13 +362,14 @@ async def handle_off_command(client, message):
 @app.on_message(filters.command("white"))
 async def handle_add_command(client, message):
     global whitelisted_groups
+    user = message.from_user
 
     text = message.text.lower()
 
     try:
         group_id_to_add = int(text.split("white")[-1].strip())
     except ValueError:
-        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /add [id_group]</blockquote>")
+        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /white [id_group]</blockquote>")
         return
 
     if group_id_to_add in whitelisted_groups:
@@ -371,6 +377,8 @@ async def handle_add_command(client, message):
     else:
         whitelisted_groups.add(group_id_to_add)
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
+        
+        await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan chatbot \n<b> ╰ Where?:</b> Group id {group_id_to_remove}")
         logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
 
 @app.on_message(filters.command("rem"))
@@ -399,6 +407,8 @@ async def handle_remove_command(client, message):
 @app.on_message(filters.command("bl"))
 async def handle_blacklist_command(client, message):
     global blacklisted_groups, whitelisted_groups
+    if message.from_user.id not in OWNER_IDS:
+        return
 
     text = message.text.lower()
 
