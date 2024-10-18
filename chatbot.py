@@ -524,6 +524,31 @@ async def run_bash_command(client, message):
     except Exception as e:
         await message.reply(f"⚠️ Error: {str(e)}")
 
+@app.on_message(filters.command("khodam"))
+async def handle_khodam(client, message):
+    msg = await message.reply("**Sedang memproses....**")
+    try:
+        user = await Extract().getId(message)
+        if not user:
+            return await msg.edit("**harap berikan username atau reply ke pengguna untuk dicek khodam nya**")
+        get_name = await client.get_users(user)
+        full_name = Extract().getMention(get_name)
+    except Exception:
+        full_name = Handler().getArg(message)
+    logger.get_logger(__name__).info(f"Permintaan mengecek khodam: {full_name}")
+
+    try:
+        result = my_api.KhodamCheck(full_name)
+        await Handler().sendLongPres(message, result)
+        await msg.delete()
+        logger.get_logger(__name__).info(f"Berhasil mendapatkan info khodam: {full_name}")
+    except Exception as e:
+        await Handler().sendLongPres(message, str(e))
+        await msg.delete()
+        
+        await client.send_message(LOGS_GROUP_ID, f"<b>Jir</b>: <pre>{e}</pre>")
+        logger.get_logger(__name__).error(str(e))
+
 
 if __name__ == "__main__":
     app.run()
