@@ -105,20 +105,33 @@ async def start(client, message):
     user = message.from_user
     user_id = user.id
 
-    # Jika pengguna adalah pemilik bot atau sudah bergabung di semua channel, lanjutkan dengan pesan selamat datang
     keyboard = [
         [InlineKeyboardButton("Developer", url="https://t.me/chakszzz"),
-        InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128")],
-         [InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
+         InlineKeyboardButton("Other Bot", url="https://t.me/pamerdong/128")],
+        [InlineKeyboardButton("Add to Group", url=f"https://t.me/{bot_username}?startgroup=true")],
+        [InlineKeyboardButton("Cara Penggunaan", callback_data="lanjutkan_penggunaan")]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await message.reply_text(
-        "<blockquote>"
         f"<b>👋 Halo {user.mention}!</b>\n"
         "Kenalin, gue adalah asisten virtual cerdas yang siap bantu lo kapan aja! 🤖✨ Dari pertanyaan simpel sampai yang rumit, gue punya jawabannya. "
         "Gue diprogram buat ngasih respon cepat dan akurat ⚡️.\n\n"
         "Ayo, coba ajak gue ke grup lo, biar obrolan makin seru dan informatif! 🎉 Tapi inget, <b>hindari spam</b> ya! Kalau spam, gue bakal laporin ke owner! 🚫👮‍♂️\n\n"
+        "Klik tombol di bawah ini untuk mengetahui cara penggunaannya.",
+        reply_markup=reply_markup
+    )
+
+    await client.send_message(
+        LOGS_GROUP_ID,
+        f"<b>❏ User: {user.mention}\n <b>├ ID:</b> {user.id}\n <b>╰ Why?:</b> baru saja memulai bot.",
+    )
+    logger.get_logger(__name__).info("Mengirim pesan selamat datang ke user")
+
+
+@app.on_callback_query(filters.regex("lanjutkan_penggunaan"))
+async def lanjutkan_penggunaan(client, callback_query):
+    await callback_query.message.edit_text(
         "<b>Langkah-langkah untuk menggunakan bot di grup:</b>\n"
         "1️⃣ Tambahkan ID grup lo dengan mengetik: /white [id_group]\n"
         "2️⃣ Aktifkan bot di grup dengan mengetik: /on [id_group]\n"
@@ -126,16 +139,20 @@ async def start(client, message):
         "Selain itu, gue juga punya beberapa fitur keren seperti:\n"
         "🔊 /tts: Ubah teks jadi suara dengan mudah.\n"
         "👻 /khodam: Cek khodam mu.\n\n"
-        "</blockquote>",
-        reply_markup=reply_markup
+        "Jangan ragu buat coba sekarang dan rasakan pengalaman baru! 🔥",
+        reply_markup=InlineKeyboardMarkup([
+            [InlineKeyboardButton("🔙 Kembali", callback_data="start_over")],
+            [InlineKeyboardButton("Tutup 🚪", callback_data="ckp")]
+        ])
     )
 
-    # Mengirim pesan log ke grup logs
-    await client.send_message(
-        LOGS_GROUP_ID,
-        f"<b>❏ User: {user.mention}\n <b>├ ID:</b> {user.id}\n <b>╰ Why?:</b> baru saja memulai bot.",
-    )
-    logger.get_logger(__name__).info("Mengirim pesan selamat datang ke user")
+@app.on_callback_query(filters.regex("start_over"))
+async def start_over(client, callback_query):
+    await start(client, callback_query.message)
+
+@app.on_callback_query(filters.regex("ckp"))
+async def start_over(client, callback_query):
+    await callback_query.message.delete()
 
 @app.on_message(filters.command(["bencode", "bdecode"]))
 async def handle_encrypt(client, message):
