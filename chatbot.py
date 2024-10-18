@@ -120,12 +120,12 @@ async def start(client, message):
         "Gue diprogram buat ngasih respon cepat dan akurat ⚡️.\n\n"
         "Ayo, coba ajak gue ke grup lo, biar obrolan makin seru dan informatif! 🎉 Tapi inget, <b>hindari spam</b> ya! Kalau spam, gue bakal laporin ke owner! 🚫👮‍♂️\n\n"
         "<b>Langkah-langkah untuk menggunakan bot di grup:</b>\n"
-        "1️⃣ Tambahkan ID grup lo dengan mengetik: <code>/white [id_group]</code>\n"
-        "2️⃣ Aktifkan bot di grup dengan mengetik: <code>/on [id_group]</code>\n"
-        "3️⃣ Lo bisa matiin bot kapan aja dengan: <code>/off [id_group]</code> kalau butuh istirahat 💤\n\n"
+        "1️⃣ Tambahkan ID grup lo dengan mengetik: /white [id_group]\n"
+        "2️⃣ Aktifkan bot di grup dengan mengetik: /on [id_group]\n"
+        "3️⃣ Lo bisa matiin bot kapan aja dengan: /off [id_group] kalau butuh istirahat 💤\n\n"
         "Selain itu, gue juga punya beberapa fitur keren seperti:\n"
-        "🔊 <code>/tts</code>: Ubah teks jadi suara dengan mudah.\n"
-        "👻 <code>/khodam</code>: Cek khodam mu.\n\n"
+        "🔊 /tts: Ubah teks jadi suara dengan mudah.\n"
+        "👻 /khodam: Cek khodam mu.\n\n"
         "</blockquote>",
         reply_markup=reply_markup
     )
