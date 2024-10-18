@@ -454,6 +454,7 @@ async def handle_tts(client, message):
         await asyncio.sleep(e.x)
     except Exception as e:
         logger.get_logger(__name__).error(f"Error generating {command}: {e}")
+        await client.send_message(LOGS_GROUP_ID, f"Eror: <pre>{e}</pre>")
         await msg.edit(f"Error: {str(e)}")
 
 @app.on_message(filters.command("image"))
