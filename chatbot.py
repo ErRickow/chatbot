@@ -117,7 +117,10 @@ async def start(client, message):
         f"<b>👋 Halo {user.mention}!</b>\n"
         "Kenalin, gue adalah asisten virtual cerdas yang selalu siap membantu lo! Dari pertanyaan simpel sampai yang rumit, gue punya jawabannya. "
         "Gue udah diprogram untuk ngasih respon yang cepat dan akurat.\n\n"
-        "Ayo coba ajak gue ke grup lo, biar obrolan jadi lebih seru dan informatif! Tapi inget, <b>hindari spam ya! Kalau spam, gue nggak segan-segan laporin ke admin!</b>",
+        "Ayo coba ajak gue ke grup lo, biar obrolan jadi lebih seru dan informatif! Tapi inget, <b>hindari spam ya! Kalau spam, gue nggak segan-segan laporin ke admin!</b>\n\n"
+        "Sebelum bisa dipakai di grup, lo harus pencet /white untuk menambahkan ID grup lo ke bot, misalnya: <code>/white [id_group]</code>.\n"
+        "Lalu, aktifkan bot di grup dengan perintah <code>/on [id_group]</code> biar bot bisa aktif dan membantu lo! "
+        "Lo juga bisa matiin bot kapan aja dengan <code>/off [id_group]</code> kalau butuh istirahat.",
         reply_markup=reply_markup
     )
 
