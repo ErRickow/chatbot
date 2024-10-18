@@ -146,8 +146,8 @@ async def lanjutkan_penggunaan(client, callback_query):
 
 @app.on_callback_query(filters.regex("start_over"))
 async def start_over(client, callback_query):
- #   await callback_query.message.delete()
-    await start(client, callback_query.message.chat)
+    await callback_query.message.delete()
+    await start(client, callback_query.message)
 
 @app.on_callback_query(filters.regex("ckp"))
 async def tutup(client, callback_query):
