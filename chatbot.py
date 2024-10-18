@@ -58,9 +58,6 @@ binary = BinaryEncryptor(1945)
 
 LOGS_GROUP_ID = -1002423575637  
 
-from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
-from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChatWriteForbidden
-
 MUST_JOIN = ["Er_support_group", "ZeebSupport"]
 
 @app.on_message(filters.incoming & filters.private, group=-1)
