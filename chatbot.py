@@ -119,6 +119,7 @@ async def start(client, message):
         reply_markup=reply_markup
     )
 
+    # Kirim pesan log hanya saat pengguna pertama kali menjalankan /start
     await client.send_message(
         LOGS_GROUP_ID,
         f"<b>❏ User: {user.mention}\n <b>├ ID:</b> {user.id}\n <b>╰ Why?:</b> baru saja memulai bot.",
@@ -145,11 +146,12 @@ async def lanjutkan_penggunaan(client, callback_query):
 
 @app.on_callback_query(filters.regex("start_over"))
 async def start_over(client, callback_query):
-    await start(client, callback_query.message)
+    await callback_query.message.delete()  # Hapus pesan yang ada
+    await start(client, callback_query.message.chat)  # Kirim pesan start baru
 
 @app.on_callback_query(filters.regex("ckp"))
-async def start_over(client, callback_query):
-    await callback_query.message.delete()
+async def tutup(client, callback_query):
+    await callback_query.message.delete()  # Hapus pesan saat tombol Tutup ditekan
 
 @app.on_message(filters.command(["bencode", "bdecode"]))
 async def handle_encrypt(client, message):
