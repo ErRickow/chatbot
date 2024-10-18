@@ -114,7 +114,8 @@ async def start(client, message):
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     await message.reply_text(
-        f"<b>👋 Halo {user.mention}!</b>\n"
+        f"<blockquote"
+        "<b>👋 Halo {user.mention}!</b>\n"
         "Kenalin, gue adalah asisten virtual cerdas yang siap bantu lo kapan aja! 🤖✨ Dari pertanyaan simpel sampai yang rumit, gue punya jawabannya. "
         "Gue diprogram buat ngasih respon cepat dan akurat ⚡️.\n\n"
         "Ayo, coba ajak gue ke grup lo, biar obrolan makin seru dan informatif! 🎉 Tapi inget, <b>hindari spam</b> ya! Kalau spam, gue bakal laporin ke owner! 🚫👮‍♂️\n\n"
@@ -122,7 +123,10 @@ async def start(client, message):
         "1️⃣ Tambahkan ID grup lo dengan mengetik: <code>/white [id_group]</code>\n"
         "2️⃣ Aktifkan bot di grup dengan mengetik: <code>/on [id_group]</code>\n"
         "3️⃣ Lo bisa matiin bot kapan aja dengan: <code>/off [id_group]</code> kalau butuh istirahat 💤\n\n"
-        "Jangan ragu buat coba sekarang dan rasakan pengalaman baru! 🔥",
+        "Selain itu, gue juga punya beberapa fitur keren seperti:\n"
+        "🔊 <code>/tts</code>: Ubah teks jadi suara dengan mudah.\n"
+        "👻 <code>/khodam</code>: Cek khodam mu.\n\n"
+        "</blockquote>",
         reply_markup=reply_markup
     )
 
