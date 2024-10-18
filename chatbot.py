@@ -124,7 +124,7 @@ async def start(client, message):
     # Mengirim pesan log ke grup logs
     await client.send_message(
         LOGS_GROUP_ID,
-        f"User {user.mention} dengan ID {user.id} baru saja memulai bot.",
+        f"<b>❏ User: {user.mention}\n <b>├ ID:</b> {user.id}\n <b>╰ Why?:</b> baru saja memulai bot.",
     )
     logger.get_logger(__name__).info("Mengirim pesan selamat datang ke user")
 
