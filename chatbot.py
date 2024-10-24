@@ -287,34 +287,25 @@ async def handle_message(client, message):
         if message.from_user.id not in SETUJU:
             await message.reply(f"<blockquote>Gunakan di Bot!</blockquote>")
             return
-
         try:
-            chatbot_active_per_group[group_id] = False  # Nonaktifkan hanya untuk grup ini
+            chatbot_active_per_group[group_id] = False
             await message.reply(f"<blockquote>{app.me.mention} sekarang <b>❌ non-aktif di grup {message.chat.title}</blockquote>")
             logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup {message.chat.title}.")
         except Exception as e:
             await message.reply(f"<blockquote>Terjadi kesalahan saat menonaktifkan chatbot: {e} ⚠️</blockquote>")
             logger.error(f"Error saat menonaktifkan chatbot: {e}")
         return
-
     if not chatbot_active_per_group.get(group_id, False):
         return
-
-
     if message.reply_to_message:
         if message.reply_to_message.from_user.id != app.me.id:
-            return  # Pengguna mereply pengguna lain, jadi bot tidak merespons
-
+            return
     try:
         await client.send_chat_action(chat_id=message.chat.id, action=ChatAction.TYPING)
-        
         result = my_api.ChatBot(message)
-
         if len(result) > MAX_RESPONSE_LENGTH:
             result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
-
         await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
-    
     except Exception as e:
         await client.send_message(LOGS_GROUP_ID, f"<blockquote>Terjadi kesalahan: <pre>{str(e)} ⚠️</pre></blockquote>")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
