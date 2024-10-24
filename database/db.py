@@ -104,7 +104,12 @@ class DatabaseClient:
 
     def set_var(self, bot_id, vars_name, value, query="vars"):
         self._check_connection()
-        json_value = json.dumps(value)  # Convert dictionary to JSON string
+        vars_list = self.get_list_from_var(bot_id, vars_name, query)
+        
+        if value not in vars_list:
+            vars_list.append(value)
+        
+        json_value = json.dumps(" ".join(vars_list))  # Convert to JSON string
         with self.lock:
             with self._connection as conn:
                 cursor = conn.cursor()
@@ -118,7 +123,7 @@ class DatabaseClient:
                         bot_id,
                         f"$.{query}.{vars_name}",
                         json_value,
-                    ),  # Use JSON string
+                    )
                 )
 
         # Method to get a variable (with JSON deserialization)
