@@ -391,11 +391,11 @@ async def handle_add_command(client, message):
         return
 
     # Cek apakah grup sudah ada di whitelist database
-    whitelisted_groups = dB.get_list_from_var("whitelist", "group_ids")
+    whitelisted_groups = dB.get_list_from_var(user, "whitelisted_groups")
     if str(group_id_to_add) in whitelisted_groups:
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
     else:
-        dB.add_to_var("whitelist", "group_ids", str(group_id_to_add))
+        dB.add_to_var(user, "whitelisted_groups", str(group_id_to_add))
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
 
         await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan chatbot \n<b> ╰ Where?:</b> Group id {group_id_to_add}")
