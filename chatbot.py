@@ -131,9 +131,9 @@ async def start(client, message):
 async def lanjutkan_penggunaan(client, callback_query):
     await callback_query.message.edit_text(
         "<b>Langkah-langkah untuk menggunakan bot di grup:</b>\n"
-        "1️⃣ Tambahkan ID grup lo dengan mengetik: /white [id_group]\n"
-        "2️⃣ Aktifkan bot di grup dengan mengetik: /on [id_group]\n"
-        "3️⃣ Lo bisa matiin bot kapan aja dengan: /off [id_group] kalau butuh istirahat 💤\n\n"
+        "1️⃣ Tambahkan ID grup lo dengan mengetik: /white [@Username_group atau id_group]\n"
+        "2️⃣ Aktifkan bot di grup dengan mengetik: /on [@Username_group atau id_group]\n"
+        "3️⃣ Lo bisa matiin bot kapan aja dengan: /off [@Username_group atau id_group] kalau butuh istirahat 💤\n\n"
         "Selain itu, gue juga punya beberapa fitur keren seperti:\n"
         "🔊 /tts: Ubah teks jadi suara dengan mudah.\n"
         "👻 /khodam: Cek khodam mu.\n\n"
