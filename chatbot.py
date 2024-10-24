@@ -313,27 +313,38 @@ async def handle_message(client, message):
 @app.on_message(filters.command("on"))
 async def handle_on_command(client, message):
     global chatbot_active_per_group
-    text = message.text.lower()
+    text = message.text.split(maxsplit=1)[-1].strip()
     user = message.from_user
-
     try:
-        # Ambil ID grup dan nama grup
-        try:
-            group_id_to_activate = int(text.split(" ")[-1].strip())
-            if not str(group_id_to_activate).startswith("-100"):
-                group_id_to_activate = -100 * group_id_to_activate
-        except (ValueError, IndexError):
-            group_id_to_activate = message.chat.id
+        # Cek apakah input adalah username grup atau ID grup
+        if text.startswith("@"):
+            # Ini adalah username grup publik
+            chat = await client.get_chat(text)
+            group_id_to_activate = chat.id
+            group_name = chat.title
+        elif text.startswith("-100"):
+            # Ini adalah ID grup privat
+            group_id_to_activate = int(text)
+            chat = await client.get_chat(group_id_to_activate)
+            group_name = chat.title
+        else:
+            await message.reply("Masukkan username atau ID grup yang valid.")
+            return
 
-        group_name = message.chat.title if message.chat.title else "Private Chat"
-
-        # Aktifkan chatbot
+        # Aktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_activate] = True
-        await message.reply(f"<blockquote>Chatbot sekarang aktif di grup <b>{group_name}</b> dengan ID {group_id_to_activate}</blockquote>")
+        await message.reply(f"<blockquote>Chatbot sekarang <b>🎉 aktif</b> di grup {group_name} dengan ID {group_id_to_activate}</blockquote>")
 
-        await client.send_message(LOGS_GROUP_ID, f"<b>User:</b> {user.mention} mengaktifkan chatbot di grup <b>{group_name}</b> (ID {group_id_to_activate}).")
+        # Mengirim pesan notifikasi ke grup logs
+        await client.send_message(
+            LOGS_GROUP_ID,
+            f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> mengaktifkan chatbot \n<b> ╰ Where?:</b> grup {group_name} dengan ID {group_id_to_activate}.",
+        )
+        logger.get_logger(__name__).info(f"Chatbot aktif di grup {group_name} dengan ID {group_id_to_activate} oleh {user.mention}.")
     except Exception as e:
-        await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot:\n<pre>{e}</pre>")
+        await message.reply(f"Terjadi kesalahan saat mengaktifkan chatbot: \n<pre>{e} ⚠️</pre>\n Pastikan menggunakan format yang benar:\n/on [@username_grup] atau /on [-100id_grup].")
+        
+        await client.send_message(LOGS_GROUP_ID, f"Bukan gitu caranya mas {user.mention}")
         logger.error(f"Error saat mengaktifkan chatbot: {e}")
 
 
