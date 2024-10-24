@@ -71,7 +71,7 @@ async def must_join_channel(app: Client, msg: Message):
             except UserNotParticipant:
                 await app.send_message(
                     LOGS_GROUP_ID,
-                    f"User {msg.from_user.mention} belum bergabung ke {channel}."
+                    f"Bang {msg.from_user.mention} gabung dahulu ke {channel}."
                 )
                 if channel.isalpha():
                     link = "https://t.me/" + channel
