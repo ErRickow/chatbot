@@ -12,7 +12,6 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChatWriteForbidden
-from database import dB
 
 if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
@@ -21,8 +20,7 @@ if len(sys.argv) < 2:
 OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
-group_id_to_add = int(text.split("white")[-1].strip())
-whitelisted_groups = dB.get_var(group_id_to_add, "white")
+whitelisted_groups = set()
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
@@ -384,10 +382,11 @@ async def handle_off_command(client, message):
 async def handle_add_command(client, message):
     global whitelisted_groups
     user = message.from_user
+
     text = message.text.lower()
 
     try:
-        group_id_to_add = int(text.split("white")[-1].strip())
+        group_id_to_add = int(text.split("white")[-100].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /white [id_group]</blockquote>")
         return
