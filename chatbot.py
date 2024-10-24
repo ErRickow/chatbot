@@ -304,7 +304,7 @@ async def handle_message(client, message):
         result = my_api.ChatBot(message)
         if len(result) > MAX_RESPONSE_LENGTH:
             result = result[:MAX_RESPONSE_LENGTH] + "\n\n[Response truncated...]"
-        await message.reply(f"<blockquote>{result}</blockquote>", quote=True)
+        await Handler().sendLongPres(message, result)
     except Exception as e:
         await client.send_message(LOGS_GROUP_ID, f"<blockquote>Terjadi kesalahan: <pre>{str(e)} ⚠️</pre></blockquote>")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
