@@ -56,7 +56,6 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
-
 LOGS_GROUP_ID = -1002423575637  
 
 MUST_JOIN = ["Er_support_group", "ZeebSupport"]
