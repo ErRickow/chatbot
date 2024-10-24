@@ -56,6 +56,7 @@ my_api = Api(name=BOT_NAME, dev=DEV_NAME)
 trans = Translate()
 binary = BinaryEncryptor(1945)
 
+
 LOGS_GROUP_ID = -1002423575637  
 
 MUST_JOIN = ["Er_support_group", "ZeebSupport"]
@@ -559,6 +560,38 @@ async def handle_khodam(client, message):
         
         await client.send_message(LOGS_GROUP_ID, f"<b>Jir</b>: <pre>{e}</pre>")
         logger.get_logger(__name__).error(str(e))
+
+@app.on_message(filters.command("whitelist") & filters.user(OWNER_IDS))
+async def show_whitelist(client, message):
+    if not whitelisted_groups:
+        await message.reply("<blockquote>Whitelist kosong.</blockquote>")
+        return
+
+    reply = "<b>Whitelist Groups:</b>\n"
+    for group_id in whitelisted_groups:
+        try:
+            chat = await client.get_chat(group_id)
+            reply += f"• {chat.title} (ID: {group_id})\n"
+        except:
+            reply += f"• Grup ID: {group_id} (Nama tidak tersedia)\n"
+
+    await message.reply(reply)
+
+@app.on_message(filters.command("blacklist") & filters.user(OWNER_IDS))
+async def show_blacklist(client, message):
+    if not blacklisted_groups:
+        await message.reply("<blockquote>Blacklist kosong.</blockquote>")
+        return
+
+    reply = "<b>Blacklist Groups:</b>\n"
+    for group_id in blacklisted_groups:
+        try:
+            chat = await client.get_chat(group_id)
+            reply += f"• {chat.title} (ID: {group_id})\n"
+        except:
+            reply += f"• Grup ID: {group_id} (Nama tidak tersedia)\n"
+
+    await message.reply(reply)
 
 
 if __name__ == "__main__":
