@@ -49,7 +49,7 @@ DEV_NAME = os.getenv("DEV_NAME")
 
 app = Client(name=BOT_TOKEN.split(":")[0], api_id=API_ID, api_hash=API_HASH, bot_token=BOT_TOKEN)
 
-chatbot_active = True
+chatbot_active = False
 user_last_response_time = defaultdict(lambda: 0)
 response_cooldown = 0.5
 my_api = Api(name=BOT_NAME, dev=DEV_NAME)
