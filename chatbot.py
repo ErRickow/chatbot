@@ -380,23 +380,23 @@ async def handle_off_command(client, message):
 
 @app.on_message(filters.command("white"))
 async def handle_add_command(client, message):
-    global whitelisted_groups
     user = message.from_user
-
     text = message.text.lower()
 
     try:
-        group_id_to_add = int(text.split("white")[-100].strip())
+        group_id_to_add = int(text.split("white")[-1].strip())
     except ValueError:
         await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /white [id_group]</blockquote>")
         return
 
-    if group_id_to_add in whitelisted_groups:
+    # Cek apakah grup sudah ada di whitelist database
+    whitelisted_groups = dB.get_list_from_var("whitelist", "group_ids")
+    if str(group_id_to_add) in whitelisted_groups:
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
     else:
-        dB.set_var(group_id_to_add, "white")
+        dB.add_to_var("whitelist", "group_ids", str(group_id_to_add))
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
-        
+
         await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan chatbot \n<b> ╰ Where?:</b> Group id {group_id_to_add}")
         logger.get_logger(__name__).info(f"Grup dengan ID {group_id_to_add} ditambahkan ke whitelist.")
 
