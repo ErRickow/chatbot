@@ -104,12 +104,7 @@ class DatabaseClient:
 
     def set_var(self, bot_id, vars_name, value, query="vars"):
         self._check_connection()
-        vars_list = self.get_list_from_var(bot_id, vars_name, query)
-        
-        if value not in vars_list:
-            vars_list.append(value)
-        
-        json_value = json.dumps(" ".join(vars_list))  # Convert to JSON string
+        json_value = json.dumps(value)  # Convert dictionary to JSON string
         with self.lock:
             with self._connection as conn:
                 cursor = conn.cursor()
@@ -123,7 +118,7 @@ class DatabaseClient:
                         bot_id,
                         f"$.{query}.{vars_name}",
                         json_value,
-                    )
+                    ),  # Use JSON string
                 )
 
         # Method to get a variable (with JSON deserialization)
@@ -175,49 +170,25 @@ class DatabaseClient:
             cursor.execute("DELETE FROM variabel WHERE _id = ?", (bot_id,))
 
     # Replacing get_list_from_var
-    def get_list_from_var(self, bot_id, vars_name, query="vars"):
+    def get_list_from_var(self, user_id, vars_name, query="vars"):
         self._check_connection()
-        vars_data = self.get_var(bot_id, vars_name, query)
-        return vars_data.split() if vars_data else []
-    
-    def add_to_var(self, bot_id, vars_name, group_id, query="vars"):
+        vars_data = self.get_var(user_id, vars_name, query)
+        return [int(x) for x in str(vars_data).split()] if vars_data else []
+
+    # Replacing add_to_var
+    def add_to_var(self, user_id, vars_name, value, query="vars"):
         self._check_connection()
-        vars_list = self.get_list_from_var(bot_id, vars_name, query)
-        if group_id not in vars_list:
-            vars_list.append(group_id)
-        self.set_var(bot_id, vars_name, " ".join(vars_list), query)
-    
-    def remove_from_var(self, bot_id, vars_name, group_id, query="vars"):
+        vars_list = self.get_list_from_var(user_id, vars_name, query)
+        vars_list.append(value)
+        self.set_var(user_id, vars_name, " ".join(map(str, vars_list)), query)
+
+    # Replacing remove_from_var
+    def remove_from_var(self, user_id, vars_name, value, query="vars"):
         self._check_connection()
-        vars_list = self.get_list_from_var(bot_id, vars_name, query)
-        if group_id in vars_list:
-            vars_list.remove(group_id)
-            self.set_var(bot_id, vars_name, " ".join(vars_list), query)
-
-    def add_chat_history(self, user_id, message):
-        chat_history = self.get_chat_history(user_id, default=[])
-        chat_history.append(message)
-        self.set(f"core.layla.user_{user_id}", "chat_history", chat_history)
-
-    def get_chat_history(self, user_id, default=None):
-        if default is None:
-            default = []
-        return self.get(f"core.layla.user_{user_id}", "chat_history", default=[])
-
-    def addaiuser(self, user_id):
-        chatai_users = self.get("core.chatbot", "chatai_users", default=[])
-        if user_id not in chatai_users:
-            chatai_users.append(user_id)
-            self.set("core.chatbot", "chatai_users", chatai_users)
-
-    def remaiuser(self, user_id):
-        chatai_users = self.get("core.chatbot", "chatai_users", default=[])
-        if user_id in chatai_users:
-            chatai_users.remove(user_id)
-            self.set("core.chatbot", "chatai_users", chatai_users)
-
-    def getaiusers(self):
-        return self.get("core.chatbot", "chatai_users", default=[])
+        vars_list = self.get_list_from_var(user_id, vars_name, query)
+        if value in vars_list:
+            vars_list.remove(value)
+            self.set_var(user_id, vars_name, " ".join(map(str, vars_list)), query)
 
 
 dB = DatabaseClient(db_path)
