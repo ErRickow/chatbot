@@ -21,7 +21,8 @@ if len(sys.argv) < 2:
 OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
-whitelisted_groups = dB.get_var(group_id, "white")
+group_id_to_add = int(text.split("white")[-1].strip())
+whitelisted_groups = dB.get_var(group_id_to_add, "white")
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
