@@ -21,7 +21,6 @@ if len(sys.argv) < 2:
 OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
-group_id = Message.chat.id
 whitelisted_groups = dB.get_var(group_id, "white")
 blacklisted_groups = set()
 
