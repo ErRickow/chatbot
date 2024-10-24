@@ -21,7 +21,7 @@ if len(sys.argv) < 2:
 OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
-whitelisted_groups = set()
+#whitelisted_groups = set()
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
