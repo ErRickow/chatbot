@@ -12,7 +12,6 @@ from pyrogram.errors import FloodWait
 from pyrogram.errors import UserNotParticipant
 from pyrogram.types import InlineKeyboardMarkup, InlineKeyboardButton, Message
 from pyrogram.errors import ChatAdminRequired, UserNotParticipant, ChatWriteForbidden
-from database import dB
 
 if len(sys.argv) < 2:
     print("Error: Harap tentukan file .env sebagai argumen saat menjalankan skrip.")
@@ -21,7 +20,7 @@ if len(sys.argv) < 2:
 OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
-#whitelisted_groups = set()
+whitelisted_groups = set()
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
