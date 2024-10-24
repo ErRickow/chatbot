@@ -20,7 +20,8 @@ if len(sys.argv) < 2:
 OWNER_IDS = [1448273246]
 SETUJU = [6607703424, 940232666, 1325957770, 1448273246, 5913061784]
 
-whitelisted_groups = set()
+group_id = message.chat.id
+whitelisted_groups = dB.get_var(group_id, "white")
 blacklisted_groups = set()
 
 MAX_RESPONSE_LENGTH = 5000
@@ -382,7 +383,6 @@ async def handle_off_command(client, message):
 async def handle_add_command(client, message):
     global whitelisted_groups
     user = message.from_user
-
     text = message.text.lower()
 
     try:
@@ -394,7 +394,7 @@ async def handle_add_command(client, message):
     if group_id_to_add in whitelisted_groups:
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
     else:
-        whitelisted_groups.add(group_id_to_add)
+        dB.set_var(group_id_to_add, "white")
         await message.reply(f"<blockquote>Grup dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
         
         await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan chatbot \n<b> ╰ Where?:</b> Group id {group_id_to_add}")
