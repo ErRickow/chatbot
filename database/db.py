@@ -190,4 +190,30 @@ class DatabaseClient:
             vars_list.remove(value)
             self.set_var(user_id, vars_name, " ".join(map(str, vars_list)), query)
 
+    def add_chat_history(self, user_id, message):
+        chat_history = self.get_chat_history(user_id, default=[])
+        chat_history.append(message)
+        self.set(f"core.layla.user_{user_id}", "chat_history", chat_history)
+
+    def get_chat_history(self, user_id, default=None):
+        if default is None:
+            default = []
+        return self.get(f"core.layla.user_{user_id}", "chat_history", default=[])
+
+    def addaiuser(self, user_id):
+        chatai_users = self.get("core.chatbot", "chatai_users", default=[])
+        if user_id not in chatai_users:
+            chatai_users.append(user_id)
+            self.set("core.chatbot", "chatai_users", chatai_users)
+
+    def remaiuser(self, user_id):
+        chatai_users = self.get("core.chatbot", "chatai_users", default=[])
+        if user_id in chatai_users:
+            chatai_users.remove(user_id)
+            self.set("core.chatbot", "chatai_users", chatai_users)
+
+    def getaiusers(self):
+        return self.get("core.chatbot", "chatai_users", default=[])
+
+
 dB = DatabaseClient(db_path)
