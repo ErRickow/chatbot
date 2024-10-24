@@ -383,30 +383,37 @@ async def handle_off_command(client, message):
 
 
 @app.on_message(filters.command("white"))
-async def handle_add_command(client, message):
+async def handle_white_command(client, message):
     global whitelisted_groups
-    text = message.text.lower()
+    text = message.text.split(maxsplit=1)[-1].strip()
     user = message.from_user
 
     try:
-        # Ambil ID grup dan nama grup
-        group_id_to_add = int(text.split("white")[-1].strip())
-        if not str(group_id_to_add).startswith("-100"):
-            group_id_to_add = -100 * group_id_to_add
-    except ValueError:
-        await message.reply(f"<blockquote>ID grup tidak valid. Gunakan format: /white [id_group]</blockquote>")
-        return
+        # Cek apakah input adalah username grup atau ID grup
+        if text.startswith("@"):
+            chat = await client.get_chat(text)
+            group_id_to_add = chat.id
+            group_name = chat.title
+        elif text.startswith("-100"):
+            group_id_to_add = int(text)
+            chat = await client.get_chat(group_id_to_add)
+            group_name = chat.title
+        else:
+            await message.reply("Masukkan username atau ID grup yang valid.")
+            return
 
-    group_name = message.chat.title if message.chat.title else "Private Chat"
+        # Tambahkan ke whitelist
+        if group_id_to_add in whitelisted_groups:
+            await message.reply(f"<blockquote>Grup {group_name} dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
+        else:
+            whitelisted_groups.add(group_id_to_add)
+            await message.reply(f"<blockquote>Grup {group_name} dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
 
-    # Cek apakah grup sudah ada di whitelist
-    if group_id_to_add in whitelisted_groups:
-        await message.reply(f"<blockquote>Grup <b>{group_name}</b> dengan ID {group_id_to_add} sudah ada di whitelist.</blockquote>")
-    else:
-        whitelisted_groups.add(group_id_to_add)
-        await message.reply(f"<blockquote>Grup <b>{group_name}</b> dengan ID {group_id_to_add} berhasil ditambahkan ke whitelist.</blockquote>")
-
-        await client.send_message(LOGS_GROUP_ID, f"<b>User:</b> {user.mention} menambahkan grup <b>{group_name}</b> (ID {group_id_to_add}) ke whitelist.")
+            await client.send_message(LOGS_GROUP_ID, f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menambahkan ke whitelist \n<b> ╰ Where?:</b> grup {group_name} dengan ID {group_id_to_add}")
+            logger.get_logger(__name__).info(f"Grup {group_name} dengan ID {group_id_to_add} ditambahkan ke whitelist.")
+    except Exception as e:
+        await message.reply(f"Terjadi kesalahan saat menambahkan grup ke whitelist: \n<pre>{e} ⚠️</pre>\n Pastikan menggunakan format yang benar:\n/white [@username_grup] atau /white [-100id_grup].")
+        logger.error(f"Error saat menambahkan ke whitelist: {e}")
 
 @app.on_message(filters.command("rem"))
 async def handle_remove_command(client, message):
