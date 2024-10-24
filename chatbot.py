@@ -347,31 +347,38 @@ async def handle_on_command(client, message):
         await client.send_message(LOGS_GROUP_ID, f"Bukan gitu caranya mas {user.mention}")
         logger.error(f"Error saat mengaktifkan chatbot: {e}")
 
-
 @app.on_message(filters.command("off"))
 async def handle_off_command(client, message):
     global chatbot_active_per_group
-    text = message.text.lower()
+    text = message.text.split(maxsplit=1)[-1].strip()
     user = message.from_user
-
     try:
-        # Ambil ID grup dan nama grup
-        try:
-            group_id_to_deactivate = int(text.split(" ")[-1].strip())
-            if not str(group_id_to_deactivate).startswith("-100"):
-                group_id_to_deactivate = -100 * group_id_to_deactivate
-        except (ValueError, IndexError):
-            group_id_to_deactivate = message.chat.id
+        # Cek apakah input adalah username grup atau ID grup
+        if text.startswith("@"):
+            chat = await client.get_chat(text)
+            group_id_to_deactivate = chat.id
+            group_name = chat.title
+        elif text.startswith("-100"):
+            group_id_to_deactivate = int(text)
+            chat = await client.get_chat(group_id_to_deactivate)
+            group_name = chat.title
+        else:
+            await message.reply("Masukkan username atau ID grup yang valid.")
+            return
 
-        group_name = message.chat.title if message.chat.title else "Private Chat"
-
-        # Nonaktifkan chatbot
+        # Menonaktifkan chatbot untuk grup yang dimaksud
         chatbot_active_per_group[group_id_to_deactivate] = False
-        await message.reply(f"<blockquote>Chatbot sekarang non-aktif di grup <b>{group_name}</b> dengan ID {group_id_to_deactivate}</blockquote>")
+        await message.reply(f"<blockquote>Chatbot sekarang <b>❌ non-aktif</b> di grup {group_name} dengan ID {group_id_to_deactivate}</blockquote>")
 
-        await client.send_message(LOGS_GROUP_ID, f"<b>User:</b> {user.mention} menonaktifkan chatbot di grup <b>{group_name}</b> (ID {group_id_to_deactivate}).")
+        await client.send_message(
+            LOGS_GROUP_ID,
+            f"<b>❏ User:</b> {user.mention} \n<b> ├ Why?:</b> menonaktifkan chatbot \n<b> ╰ Where?:</b> grup {group_name} dengan ID {group_id_to_deactivate}.",
+        )
+        logger.get_logger(__name__).info(f"Chatbot dinonaktifkan di grup {group_name} dengan ID {group_id_to_deactivate} oleh {user.mention}.")
     except Exception as e:
-        await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot:\n<pre>{e}</pre>")
+        await message.reply(f"Terjadi kesalahan saat menonaktifkan chatbot: \n<pre>{e} ⚠️</pre>\n Pastikan menggunakan format yang benar:\n/off [@username_grup] atau /off [-100id_grup].")
+        
+        await client.send_message(LOGS_GROUP_ID, f"{user.mention} Bukan gitu caranya")
         logger.error(f"Error saat menonaktifkan chatbot: {e}")
 
 
