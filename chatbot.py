@@ -308,7 +308,6 @@ async def handle_message(client, message):
     except Exception as e:
         await client.send_message(LOGS_GROUP_ID, f"<blockquote>Terjadi kesalahan: <pre>{str(e)} ⚠️</pre></blockquote>")
         logger.get_logger(__name__).error(f"Terjadi kesalahan: {str(e)}")
-
     return
 
 @app.on_message(filters.command("on"))
